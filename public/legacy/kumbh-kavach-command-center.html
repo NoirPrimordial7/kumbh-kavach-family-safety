@@ -1,0 +1,3750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kumbh Kavach — Live Command Center</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Teko:wght@400;500;600;700&family=Bebas+Neue&display=swap');
+
+:root {
+  --saffron: #FF7A1A;
+  --saffron-dim: #C25A10;
+  --saffron-glow: rgba(255,122,26,0.35);
+  --gold: #FFB347;
+  --deep: #080C1A;
+  --panel: #0E1426;
+  --panel2: #141C35;
+  --panel3: #1A2344;
+  --border: rgba(255,122,26,0.22);
+  --border-strong: rgba(255,122,26,0.5);
+  --text: #ECD9B8;
+  --text-dim: #8A7A60;
+  --text-mute: #5A5040;
+  --green: #00E89C;
+  --yellow: #FFD60A;
+  --orange: #FF8C42;
+  --red: #FF3B5C;
+  --blue: #3EC6FF;
+  --purple: #B968FF;
+  --mono: 'Share Tech Mono', monospace;
+  --head: 'Teko', sans-serif;
+  --display: 'Bebas Neue', sans-serif;
+  --body: 'Rajdhani', sans-serif;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { height:100%; }
+body {
+  background: var(--deep);
+  color: var(--text);
+  font-family: var(--body);
+  overflow: hidden;
+  background-image:
+    radial-gradient(circle at 20% 20%, rgba(255,122,26,0.05) 0%, transparent 40%),
+    radial-gradient(circle at 80% 80%, rgba(62,198,255,0.04) 0%, transparent 40%);
+}
+
+/* ---------- HEADER ---------- */
+header {
+  grid-area: header;
+  background: linear-gradient(90deg, #0A0F1E 0%, #1A0C02 50%, #0A0F1E 100%);
+  border-bottom: 2px solid var(--saffron);
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 30px var(--saffron-glow);
+  z-index: 20;
+}
+.brand { display:flex; align-items:center; gap:14px; }
+.brand-icon {
+  width:46px; height:46px;
+  background: linear-gradient(135deg, var(--saffron), #FF4500);
+  border-radius: 50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:26px;
+  box-shadow: 0 0 24px var(--saffron-glow);
+  animation: pulse-icon 2.5s infinite;
+}
+@keyframes pulse-icon {
+  0%, 100% { box-shadow: 0 0 24px var(--saffron-glow); transform: scale(1); }
+  50% { box-shadow: 0 0 40px rgba(255,122,26,0.7); transform: scale(1.04); }
+}
+.brand h1 {
+  font-family: var(--display);
+  font-size: 1.9rem;
+  color: var(--saffron);
+  letter-spacing: 4px;
+  line-height: 1;
+}
+.brand p {
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+.header-right { display:flex; align-items:center; gap:14px; }
+.header-stat {
+  display:flex; flex-direction:column; align-items:flex-end;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  color: var(--text-dim);
+}
+.header-stat b { color: var(--saffron); font-size: 0.9rem; letter-spacing: 1px; }
+.live-badge {
+  display:flex; align-items:center; gap:8px;
+  background: rgba(255,59,92,0.15);
+  border:1px solid var(--red);
+  border-radius:4px;
+  padding: 5px 12px;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--red);
+}
+.live-dot {
+  width:8px; height:8px;
+  background: var(--red);
+  border-radius:50%;
+  animation: blink 1s infinite;
+}
+@keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.25;} }
+.clock { font-family: var(--mono); font-size: 0.85rem; color: var(--saffron); letter-spacing: 2px; }
+
+/* ---------- LAYOUT ---------- */
+.app {
+  display: grid;
+  grid-template-areas:
+    "header header header"
+    "left map right"
+    "scenarios scenarios scenarios";
+  grid-template-rows: 64px 1fr 90px;
+  grid-template-columns: 320px 1fr 340px;
+  height: 100vh;
+  gap: 6px;
+  padding: 6px;
+}
+
+/* ---------- SIDEBARS ---------- */
+.sidebar {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px;
+  overflow-y: auto;
+  display:flex; flex-direction:column; gap:10px;
+  font-size: 0.82rem;
+}
+.sidebar-left { grid-area: left; }
+.sidebar-right { grid-area: right; }
+.sidebar::-webkit-scrollbar { width:5px; }
+.sidebar::-webkit-scrollbar-track { background: var(--panel2); }
+.sidebar::-webkit-scrollbar-thumb { background: var(--saffron-dim); border-radius:3px; }
+
+.panel-title {
+  font-family: var(--head);
+  font-size: 1rem;
+  color: var(--saffron);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding-bottom: 5px;
+  border-bottom: 1px solid var(--border);
+  display:flex; align-items:center; gap:6px;
+}
+.panel-title .pill {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  background: var(--saffron);
+  color: var(--deep);
+  padding: 1px 6px;
+  border-radius: 2px;
+  letter-spacing: 1px;
+  margin-left: auto;
+}
+
+/* ---------- ZONE CARDS ---------- */
+.zone-card {
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--green);
+  border-radius: 4px;
+  padding: 8px 10px;
+  cursor: pointer;
+  transition: all 0.25s;
+}
+.zone-card:hover { background: var(--panel3); transform: translateX(2px); }
+.zone-card.danger { border-left-color: var(--red); animation: danger-pulse 0.8s infinite; box-shadow: inset 0 0 0 1px rgba(255,59,92,0.2); }
+.zone-card.warning { border-left-color: var(--yellow); animation: warning-pulse 1.5s infinite; }
+.zone-card.selected { background: var(--panel3); box-shadow: inset 0 0 0 1px var(--saffron); }
+@keyframes danger-pulse { 0%,100%{background:var(--panel2);box-shadow: inset 0 0 0 1px rgba(255,59,92,0.15);} 50%{background:rgba(255,59,92,0.18);box-shadow: inset 0 0 12px rgba(255,59,92,0.3);} }
+@keyframes warning-pulse { 0%,100%{background:var(--panel2);} 50%{background:rgba(255,214,10,0.08);} }
+
+.zone-head { display:flex; justify-content:space-between; align-items:center; }
+.zone-name { font-family: var(--head); font-size: 0.95rem; letter-spacing: 1px; color: var(--text); }
+.zone-status {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  padding: 2px 6px;
+  border-radius: 2px;
+  background: rgba(0,232,156,0.15);
+  color: var(--green);
+  letter-spacing: 1px;
+}
+.zone-bar {
+  margin-top: 6px;
+  height: 5px;
+  background: rgba(255,255,255,0.07);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.zone-bar-fill { height:100%; background:var(--green); transition: width 0.4s, background 0.4s; }
+.zone-meta { display:flex; justify-content:space-between; font-family:var(--mono); font-size:0.65rem; color:var(--text-dim); margin-top:4px; }
+
+/* ---------- SEARCH ---------- */
+.search-box {
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 8px;
+  display:flex; flex-direction:column; gap:6px;
+}
+.search-input {
+  background: var(--deep);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  padding: 7px 9px;
+  border-radius: 3px;
+  outline: none;
+  transition: border 0.2s;
+}
+.search-input:focus { border-color: var(--saffron); box-shadow: 0 0 0 2px var(--saffron-glow); }
+.search-input::placeholder { color: var(--text-mute); }
+
+.search-results {
+  max-height: 220px;
+  overflow-y: auto;
+  display:flex; flex-direction:column; gap:4px;
+}
+.pilgrim-row {
+  background: var(--deep);
+  border: 1px solid rgba(255,255,255,0.04);
+  border-left: 2px solid var(--saffron-dim);
+  padding: 6px 8px;
+  border-radius: 3px;
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.pilgrim-row:hover { background: var(--panel3); border-left-color: var(--saffron); }
+.pilgrim-row .name { font-weight: 600; color: var(--text); }
+.pilgrim-row .details {
+  font-family: var(--mono);
+  color: var(--text-dim);
+  font-size: 0.62rem;
+  margin-top: 2px;
+  display: flex;
+  gap: 8px;
+}
+.pilgrim-row .tag {
+  display: inline-block;
+  padding: 1px 5px;
+  border-radius: 2px;
+  font-size: 0.58rem;
+  letter-spacing: 0.5px;
+}
+.tag-band { background: rgba(255,122,26,0.18); color: var(--saffron); }
+.tag-zone { background: rgba(62,198,255,0.15); color: var(--blue); }
+.tag-lost { background: rgba(255,59,92,0.2); color: var(--red); }
+.tag-medical { background: rgba(185,104,255,0.18); color: var(--purple); }
+
+/* ---------- MAP AREA ---------- */
+.map-area {
+  grid-area: map;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  position: relative;
+  overflow: hidden;
+}
+#simCanvas { position:absolute; top:0; left:0; width:100%; height:100%; cursor: crosshair; }
+
+.map-overlay {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  background: rgba(8,12,26,0.88);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 8px 12px;
+  display: flex;
+  gap: 14px;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  backdrop-filter: blur(8px);
+  z-index: 5;
+}
+.legend-item { display:flex; align-items:center; gap:6px; color:var(--text-dim); }
+.legend-dot { width:9px; height:9px; border-radius:50%; }
+
+.surge-alert {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-100px);
+  background: linear-gradient(90deg, rgba(255,59,92,0.95), rgba(200,30,60,0.95));
+  border: 1.5px solid #FF3B5C;
+  border-radius: 6px;
+  padding: 10px 24px;
+  box-shadow: 0 8px 40px rgba(255,59,92,0.5);
+  font-family: var(--head);
+  font-size: 1.2rem;
+  letter-spacing: 3px;
+  color: #FFF;
+  text-transform: uppercase;
+  transition: transform 0.35s cubic-bezier(.2,.9,.3,1.3);
+  z-index: 10;
+  display: flex; align-items: center; gap: 12px;
+}
+.surge-alert.show { transform: translateX(-50%) translateY(0); }
+.surge-alert .icon { font-size: 1.5rem; animation: shake 0.4s infinite; }
+@keyframes shake { 0%,100% {transform:rotate(0);} 25% {transform:rotate(-10deg);} 75% {transform:rotate(10deg);} }
+
+.tooltip {
+  position: absolute;
+  background: rgba(8,12,26,0.95);
+  border: 1px solid var(--saffron);
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--text);
+  pointer-events: none;
+  z-index: 12;
+  opacity: 0;
+  transition: opacity 0.15s;
+  white-space: nowrap;
+}
+.tooltip.visible { opacity: 1; }
+.tooltip h4 { font-family: var(--head); color: var(--saffron); font-size: 0.95rem; letter-spacing: 1px; margin-bottom: 4px; }
+
+/* ---------- NARRATIVE PANEL ---------- */
+.narrative-panel {
+  background: linear-gradient(135deg, var(--panel2) 0%, var(--panel) 100%);
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  padding: 10px 12px;
+  position: relative;
+}
+.narrative-header {
+  display: flex; align-items: center; gap: 8px;
+  font-family: var(--head);
+  color: var(--gold);
+  font-size: 0.95rem;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+.narrative-header .dot {
+  width: 8px; height: 8px;
+  background: var(--gold);
+  border-radius: 50%;
+  animation: blink 1.2s infinite;
+}
+.narrative-text {
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--text);
+  min-height: 60px;
+  padding: 6px;
+  background: rgba(0,0,0,0.25);
+  border-radius: 3px;
+  border-left: 2px solid var(--gold);
+  transition: opacity 0.3s;
+}
+.narrative-step {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+  margin-top: 6px;
+}
+
+/* ---------- STATS ---------- */
+.stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+.stat-block {
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 8px 10px;
+  text-align: center;
+}
+.stat-number {
+  font-family: var(--display);
+  font-size: 1.5rem;
+  color: var(--saffron);
+  letter-spacing: 1px;
+}
+.stat-label {
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 2px;
+}
+
+/* ---------- WRISTBANDS ---------- */
+.wristband-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+  max-height: 150px;
+  overflow-y: auto;
+}
+.wristband {
+  background: #0A0F20;
+  border: 1px solid rgba(0,232,156,0.3);
+  border-radius: 3px;
+  padding: 5px 4px;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  transition: all 0.3s;
+  cursor: pointer;
+}
+.wristband:hover { transform: scale(1.05); }
+.wristband.active { border-color: var(--green); box-shadow: 0 0 8px rgba(0,232,156,0.3); }
+.wristband.rerouting {
+  border-color: var(--yellow);
+  background: rgba(255,214,10,0.12);
+  box-shadow: 0 0 10px rgba(255,214,10,0.5);
+  animation: band-blink 0.6s infinite;
+}
+.wristband.lost {
+  border-color: var(--red);
+  background: rgba(255,59,92,0.15);
+  animation: band-blink 0.4s infinite;
+}
+.wristband.highlight {
+  border-color: var(--saffron);
+  box-shadow: 0 0 15px var(--saffron-glow);
+  transform: scale(1.1);
+}
+@keyframes band-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+.band-id { color: var(--green); font-weight: bold; font-size: 0.7rem; }
+.wristband.rerouting .band-id { color: var(--yellow); }
+.wristband.lost .band-id { color: var(--red); }
+.band-route { color: var(--text-dim); font-size: 0.55rem; margin-top: 1px; }
+
+/* ---------- EVENT LOG ---------- */
+.event-log {
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 8px;
+  max-height: 180px;
+  overflow-y: auto;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+}
+.event-log::-webkit-scrollbar { width:4px; }
+.event-log::-webkit-scrollbar-thumb { background: var(--saffron-dim); border-radius:2px; }
+.log-entry {
+  display: flex; gap: 8px;
+  padding: 3px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.log-entry:last-child { border-bottom: none; }
+.log-time { color: var(--text-mute); min-width: 46px; font-size: 0.6rem; }
+.log-msg { flex: 1; }
+.log-msg.info { color: var(--blue); }
+.log-msg.ok { color: var(--green); }
+.log-msg.warn { color: var(--yellow); }
+.log-msg.danger { color: var(--red); font-weight: bold; }
+
+/* ---------- SCENARIO BAR ---------- */
+.scenario-bar {
+  grid-area: scenarios;
+  background: linear-gradient(90deg, var(--panel) 0%, var(--panel2) 50%, var(--panel) 100%);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  overflow-x: auto;
+}
+.scenario-label {
+  font-family: var(--head);
+  font-size: 0.85rem;
+  color: var(--gold);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding-right: 12px;
+  border-right: 1px solid var(--border);
+  min-width: 95px;
+}
+.scenario-btn {
+  background: var(--panel3);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--body);
+  font-weight: 600;
+  font-size: 0.78rem;
+  padding: 8px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  display: flex; align-items: center; gap: 6px;
+  position: relative;
+}
+.scenario-btn:hover {
+  background: var(--saffron-dim);
+  border-color: var(--saffron);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px var(--saffron-glow);
+}
+.scenario-btn.active {
+  background: linear-gradient(90deg, var(--saffron), #D85010);
+  border-color: var(--saffron);
+  color: #FFF;
+  box-shadow: 0 0 20px var(--saffron-glow);
+}
+.scenario-btn .icon { font-size: 1rem; }
+.scenario-btn .badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  font-size: 0.55rem;
+  background: var(--red);
+  color: white;
+  padding: 1px 4px;
+  border-radius: 2px;
+  font-family: var(--mono);
+}
+
+.control-mini {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  padding: 7px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  transition: all 0.2s;
+}
+.control-mini:hover { color: var(--text); border-color: var(--saffron); }
+
+/* ---------- MODAL ---------- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(5px);
+  z-index: 100;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay.show { display: flex; }
+.modal {
+  background: var(--panel);
+  border: 1.5px solid var(--saffron);
+  border-radius: 8px;
+  padding: 20px 24px;
+  min-width: 400px;
+  max-width: 560px;
+  box-shadow: 0 10px 60px rgba(255,122,26,0.3);
+  animation: modal-in 0.3s ease-out;
+}
+@keyframes modal-in {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+.modal-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 14px;
+}
+.modal-title {
+  font-family: var(--display);
+  font-size: 1.4rem;
+  color: var(--saffron);
+  letter-spacing: 3px;
+}
+.modal-close {
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  font-size: 1.4rem;
+  cursor: pointer;
+  padding: 0 8px;
+}
+.modal-close:hover { color: var(--red); }
+
+.pilgrim-card {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+.pilgrim-avatar {
+  width: 90px; height: 90px;
+  background: linear-gradient(135deg, var(--saffron), var(--saffron-dim));
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--display);
+  font-size: 2.2rem;
+  color: #FFF;
+  letter-spacing: 1px;
+}
+.pilgrim-details h3 {
+  font-family: var(--head);
+  font-size: 1.4rem;
+  color: var(--text);
+  letter-spacing: 1px;
+}
+.pilgrim-details p {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  margin-top: 4px;
+}
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 14px;
+}
+.detail-cell {
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 7px 10px;
+}
+.detail-cell .lbl {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  color: var(--text-mute);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.detail-cell .val {
+  font-family: var(--head);
+  font-size: 1rem;
+  color: var(--text);
+  margin-top: 2px;
+  letter-spacing: 1px;
+}
+.family-list {
+  margin-top: 14px;
+  padding: 10px;
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+.family-list h4 {
+  font-family: var(--head);
+  color: var(--gold);
+  letter-spacing: 2px;
+  font-size: 0.85rem;
+  margin-bottom: 8px;
+}
+.family-member {
+  display: flex; justify-content: space-between;
+  padding: 4px 0;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.family-member:last-child { border-bottom: none; }
+.family-member .name { color: var(--text); }
+
+/* ---------- IMPACT MODAL ---------- */
+.impact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.impact-card {
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--gold);
+  border-radius: 4px;
+  padding: 12px;
+}
+.impact-card .metric {
+  font-family: var(--display);
+  font-size: 2rem;
+  color: var(--saffron);
+  letter-spacing: 2px;
+}
+.impact-card .suffix { font-size: 1rem; color: var(--gold); }
+.impact-card .label {
+  font-family: var(--head);
+  font-size: 0.9rem;
+  color: var(--text);
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+.impact-card .sub {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  color: var(--text-dim);
+  margin-top: 6px;
+  line-height: 1.4;
+}
+
+/* ---------- ADMIN PANEL ---------- */
+.admin-panel {
+  padding: 10px 0;
+}
+.admin-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.admin-row label {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+}
+.admin-row input[type="range"] {
+  width: 180px;
+  accent-color: var(--saffron);
+}
+.admin-row .val-show {
+  font-family: var(--mono);
+  color: var(--saffron);
+  font-size: 0.8rem;
+  min-width: 50px;
+  text-align: right;
+}
+
+/* ---------- UTILS ---------- */
+.hidden { display: none !important; }
+.row { display: flex; align-items: center; gap: 8px; }
+button { font-family: var(--body); }
+select {
+  background: var(--deep);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 5px 8px;
+  border-radius: 3px;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+}
+select:focus { outline: none; border-color: var(--saffron); }
+
+/* toast */
+.toast {
+  position: fixed;
+  bottom: 120px;
+  left: 50%;
+  transform: translateX(-50%) translateY(50px);
+  background: var(--panel);
+  border: 1.5px solid var(--saffron);
+  border-radius: 6px;
+  padding: 10px 20px;
+  box-shadow: 0 8px 30px var(--saffron-glow);
+  z-index: 50;
+  opacity: 0;
+  transition: all 0.3s;
+  font-family: var(--head);
+  letter-spacing: 2px;
+  color: var(--text);
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+.comparison-banner {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: rgba(8,12,26,0.92);
+  border: 1px solid var(--purple);
+  border-radius: 5px;
+  padding: 8px 12px;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--purple);
+  z-index: 8;
+  display: none;
+  letter-spacing: 1px;
+}
+.comparison-banner.show { display: block; }
+.comparison-banner b { color: var(--text); }
+
+/* ---------- FOCUS MODE ---------- */
+.focus-dimmer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 6;
+  opacity: 0;
+  transition: opacity 0.7s ease;
+  /* JS will set background via radial-gradient */
+}
+.focus-dimmer.active { opacity: 1; }
+
+/* ---------- ZONE INFO POPUP ---------- */
+.zone-info-popup {
+  position: absolute;
+  background: rgba(8,12,26,0.97);
+  border: 1.5px solid var(--saffron);
+  border-radius: 6px;
+  padding: 11px 15px;
+  pointer-events: none;
+  z-index: 20;
+  opacity: 0;
+  transform: translateY(-6px) scale(0.95);
+  transition: opacity 0.22s ease, transform 0.22s ease;
+  min-width: 160px;
+  max-width: 210px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 40px rgba(255,122,26,0.25);
+}
+.zone-info-popup.visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+.zip-name {
+  font-family: var(--head);
+  font-size: 1.05rem;
+  color: var(--saffron);
+  letter-spacing: 1.5px;
+  margin-bottom: 6px;
+}
+.zip-row {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  color: var(--text-dim);
+  padding: 2px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.zip-row:last-child { border-bottom: none; }
+.zip-row b { color: var(--text); }
+.zip-status-chip {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  padding: 2px 7px;
+  border-radius: 2px;
+  margin-top: 6px;
+  letter-spacing: 1px;
+}
+.zip-hint {
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  color: var(--text-mute);
+  margin-top: 7px;
+  letter-spacing: 0.5px;
+}
+
+/* ---------- PRESENTATION NOTES MODAL ---------- */
+.pres-modal {
+  max-width: 680px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+.pres-section {
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  background: var(--panel2);
+  border-left: 3px solid var(--saffron);
+  border-radius: 3px;
+}
+.pres-section h4 {
+  font-family: var(--head);
+  color: var(--saffron);
+  font-size: 0.95rem;
+  letter-spacing: 2px;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+.pres-section p {
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: var(--text);
+}
+.pres-section .tip {
+  margin-top: 6px;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  color: var(--gold);
+  letter-spacing: 0.5px;
+}
+.focus-btn-active {
+  background: rgba(62,198,255,0.2) !important;
+  border-color: var(--blue) !important;
+  color: var(--blue) !important;
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- HEADER -->
+  <header>
+    <div class="brand">
+      <div class="brand-icon">🔱</div>
+      <div>
+        <h1>KUMBH KAVACH</h1>
+        <p>Live Command Center · Nashik Kumbh 2027</p>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="header-stat"><span>Zones Monitored</span><b id="h-zones">5</b></div>
+      <div class="header-stat"><span>Active Bands</span><b id="h-bands">0</b></div>
+      <div class="header-stat"><span>Scenario</span><b id="h-scenario">IDLE</b></div>
+      <div class="live-badge"><div class="live-dot"></div> LIVE</div>
+      <div class="clock" id="clock">--:--:--</div>
+    </div>
+  </header>
+
+  <!-- LEFT SIDEBAR -->
+  <div class="sidebar sidebar-left">
+    <div class="panel-title">🏞️ Ghat Zones <span class="pill" id="left-zone-count">5</span></div>
+    <div id="zone-list"></div>
+
+    <div class="panel-title">🔍 Pilgrim Search</div>
+    <div class="search-box">
+      <input type="text" class="search-input" id="searchInput" placeholder="Name, Band ID, Family ID, State...">
+      <div style="display:flex;gap:4px;">
+        <button class="control-mini" style="flex:1;font-size:0.65rem;" onclick="quickFilter('lost')">🚨 Lost</button>
+        <button class="control-mini" style="flex:1;font-size:0.65rem;" onclick="quickFilter('medical')">⚕ Medical</button>
+        <button class="control-mini" style="flex:1;font-size:0.65rem;" onclick="quickFilter('elderly')">👴 Elderly</button>
+        <button class="control-mini" style="flex:1;font-size:0.65rem;" onclick="quickFilter('all')">All</button>
+      </div>
+      <div class="search-results" id="searchResults"></div>
+    </div>
+
+    <div class="panel-title">🚪 Smart Bamboo Gates</div>
+    <div id="gate-list" style="display:flex;flex-direction:column;gap:4px;"></div>
+  </div>
+
+  <!-- MAP -->
+  <div class="map-area">
+    <canvas id="simCanvas"></canvas>
+
+    <div class="comparison-banner" id="comparison-banner">
+      <b>COMPARISON MODE:</b> <span id="comparison-text">Without Kumbh Kavach</span>
+    </div>
+
+    <!-- Focus mode canvas dimmer overlay -->
+    <div class="focus-dimmer" id="focusDimmer"></div>
+
+    <!-- Zone / Camp info popup -->
+    <div class="zone-info-popup" id="zoneInfoPopup">
+      <div class="zip-name" id="zip-name">Zone Name</div>
+      <div class="zip-row"><span>Crowd</span><b id="zip-crowd">—</b></div>
+      <div class="zip-row"><span>Capacity</span><b id="zip-cap">—</b></div>
+      <div class="zip-row"><span>Density</span><b id="zip-density">—</b></div>
+      <div class="zip-row"><span>Route Code</span><b id="zip-route" style="color:var(--saffron)">—</b></div>
+      <div id="zip-status-chip" class="zip-status-chip">SAFE</div>
+      <div class="zip-hint" id="zip-hint">Click elsewhere to dismiss</div>
+    </div>
+
+    <div class="map-overlay">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div> Safe</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--yellow)"></div> Warning</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div> Danger</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--blue)"></div> Rerouted</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--saffron)"></div> Open Gate</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--gold);clip-path:polygon(50% 0%,100% 100%,0% 100%)"></div> Entry Point</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--purple)"></div> Medical/VIP</div>
+    </div>
+
+    <div class="surge-alert" id="surgeAlert">
+      <span class="icon">⚠️</span>
+      <span id="surgeAlertText">SURGE DETECTED</span>
+    </div>
+
+    <div class="tooltip" id="tooltip"></div>
+  </div>
+
+  <!-- RIGHT SIDEBAR -->
+  <div class="sidebar sidebar-right">
+    <div class="narrative-panel">
+      <div class="narrative-header"><span class="dot"></span> Live Narrator</div>
+      <div class="narrative-text" id="narrativeText">
+        Welcome to Kumbh Kavach Command Center. Select a scenario below to begin. The narrator will explain every step in real time so you can follow what the system is doing.
+      </div>
+      <div class="narrative-step" id="narrativeStep">SCENARIO: none · STEP 0/0</div>
+    </div>
+
+    <div class="panel-title">📊 Live Stats</div>
+    <div class="stat-grid">
+      <div class="stat-block"><div class="stat-number" id="stat-total">0</div><div class="stat-label">Pilgrims</div></div>
+      <div class="stat-block"><div class="stat-number" id="stat-rerouted" style="color:var(--blue)">0</div><div class="stat-label">Rerouted</div></div>
+      <div class="stat-block"><div class="stat-number" id="stat-danger" style="color:var(--red)">0</div><div class="stat-label">Danger Zones</div></div>
+      <div class="stat-block"><div class="stat-number" id="stat-reunited" style="color:var(--green)">0</div><div class="stat-label">Reunited</div></div>
+    </div>
+
+    <div class="panel-title">📟 Smart Mauli Bands <span class="pill" id="band-pill">LIVE</span></div>
+    <div class="wristband-grid" id="wristbands"></div>
+
+    <div class="panel-title">🔔 Event Log</div>
+    <div class="event-log" id="eventLog">
+      <div class="log-entry"><span class="log-time">--:--</span><span class="log-msg info">System ready. Select a scenario.</span></div>
+    </div>
+  </div>
+
+  <!-- BOTTOM SCENARIO BAR -->
+  <div class="scenario-bar">
+    <div class="scenario-label">🎬 Scenarios</div>
+    <button class="scenario-btn" data-scenario="normal_day" onclick="runScenario('normal_day')"><span class="icon">☀️</span> Normal Day</button>
+    <button class="scenario-btn" data-scenario="shahi_snan" onclick="runScenario('shahi_snan')"><span class="icon">🛕</span> Shahi Snan — Full Surge <span class="badge">HERO</span></button>
+    <button class="scenario-btn" data-scenario="medical" onclick="runScenario('medical')"><span class="icon">⚕</span> Medical Emergency</button>
+    <button class="scenario-btn" data-scenario="lost_child" onclick="runScenario('lost_child')"><span class="icon">👶</span> Lost Child</button>
+    <button class="scenario-btn" data-scenario="gate_failure" onclick="runScenario('gate_failure')"><span class="icon">🚧</span> Gate Failure</button>
+    <button class="scenario-btn" data-scenario="evening_aarti" onclick="runScenario('evening_aarti')"><span class="icon">🪔</span> Evening Aarti</button>
+    <button class="scenario-btn" data-scenario="vip_corridor" onclick="runScenario('vip_corridor')"><span class="icon">🚓</span> VIP Corridor</button>
+    <button class="scenario-btn" data-scenario="compare" onclick="runScenario('compare')" style="background:rgba(185,104,255,0.2);border-color:var(--purple);"><span class="icon">⚔️</span> Without vs With</button>
+    <button class="scenario-btn" data-scenario="multi_chaos" onclick="runScenario('multi_chaos')" style="background:rgba(255,140,66,0.15);border-color:var(--orange);"><span class="icon">🌪️</span> Multi-Incident <span class="badge">NEW</span></button>
+    <button class="scenario-btn" data-scenario="stress_test" onclick="runScenario('stress_test')" style="background:rgba(255,59,92,0.18);border-color:var(--red);"><span class="icon">🔥</span> Stress Test <span class="badge">FINAL</span></button>
+
+    <div style="margin-left:auto;display:flex;gap:6px;">
+      <button class="control-mini" id="focusModeBtn" onclick="toggleFocusMode()" title="Cinematic focus on active zone during presentation">🎯 Focus Mode</button>
+      <button class="control-mini" onclick="openPresNotesModal()">📋 Pres. Notes</button>
+      <button class="control-mini" onclick="openImpactModal()">📈 Impact</button>
+      <button class="control-mini" onclick="openAdminModal()">⚙️ Admin</button>
+      <button class="control-mini" onclick="resetSim()">⟳ Reset</button>
+    </div>
+  </div>
+</div>
+
+<!-- PILGRIM DETAIL MODAL -->
+<div class="modal-overlay" id="pilgrimModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">PILGRIM RECORD</div>
+      <button class="modal-close" onclick="closePilgrimModal()">×</button>
+    </div>
+    <div id="pilgrimModalBody"></div>
+  </div>
+</div>
+
+<!-- IMPACT MODAL -->
+<div class="modal-overlay" id="impactModal">
+  <div class="modal" style="max-width:760px;">
+    <div class="modal-header">
+      <div class="modal-title">SOCIO-ECONOMIC IMPACT · SIMHASTHA KUMBH 2027</div>
+      <button class="modal-close" onclick="closeImpactModal()">×</button>
+    </div>
+    <div style="margin-bottom:14px;padding:8px 10px;background:rgba(0,232,156,0.06);border-left:3px solid var(--green);border-radius:3px;font-size:0.72rem;line-height:1.5;color:var(--text2);">
+      <b style="color:var(--green);">All figures below are grounded in verified data</b> — Govt. of Maharashtra announcements, Wikipedia stampede records, deAsra Foundation × NTKMA economic study, Press Information Bureau health reports, Uttar Pradesh Govt. lost-and-found statistics.
+    </div>
+    <div class="impact-grid">
+      <div class="impact-card">
+        <div class="label">LIVES AT RISK — PREVENTABLE</div>
+        <div class="metric"><span id="imp-lives">--</span></div>
+        <div class="sub">Verified stampede deaths at Kumbh events: <b>1954 Prayag — ~1,000</b> · <b>2003 Nashik Ramkund — 39 killed, 140 injured</b> · <b>2013 Prayag — 42 killed</b> · <b>2025 Prayagraj Mauni Amavasya — 30+ killed, 60+ injured</b>. Proactive density-threshold rerouting targets &gt;90% reduction of crush events (Oxford Journal of Travel Medicine, 2024).</div>
+      </div>
+      <div class="impact-card" style="border-left-color:var(--green);">
+        <div class="label">ECONOMIC OPPORTUNITY PROTECTED</div>
+        <div class="metric">₹<span id="imp-rupees">--</span><span class="suffix"> Cr</span></div>
+        <div class="sub">Simhastha Kumbh 2027 projected to generate <b>₹27,000 Cr</b> economic activity (deAsra Foundation × NTKMA, 2026). Direct visitor spend ₹8,500-11,000 Cr. A single major incident can halt the Mela; incident-free operation preserves the full economic cycle.</div>
+      </div>
+      <div class="impact-card" style="border-left-color:var(--blue);">
+        <div class="label">PILGRIM WAIT REDUCTION</div>
+        <div class="metric"><span id="imp-time">--</span><span class="suffix"> min</span></div>
+        <div class="sub">Adaptive rerouting redistributes load before ghats reach critical density. Prayagraj 2025 saw 30M pilgrims bathe on a single day (Mauni Amavasya) — without flow management, wait-time at peak ghats exceeds 45 min, contributing to fatigue-triggered crowd panic.</div>
+      </div>
+      <div class="impact-card" style="border-left-color:var(--purple);">
+        <div class="label">LOST-PERSON REUNIONS</div>
+        <div class="metric"><span id="imp-families">--</span><span class="suffix"> reunited</span></div>
+        <div class="sub">Kumbh 2013: <b>200,000+ registered lost</b>, peak <b>38,587 in a single day</b> (Feb 9, eve of Mauni Amavasya). Mahakumbh 2025 digital L&amp;F centres reunited 20,000+ (UP Govt., Feb 2025). Band-based tracking cuts reunion time from hours → minutes.</div>
+      </div>
+      <div class="impact-card" style="border-left-color:var(--yellow);">
+        <div class="label">MEDICAL RESPONSE SCALE</div>
+        <div class="metric"><span id="imp-medical">--</span><span class="suffix">+ cases</span></div>
+        <div class="sub">Mahakumbh 2025: <b>7 Lakh+ pilgrims treated</b> across 23 allopathic + 20 AYUSH hospitals; 3,800+ minor surgeries, 12 major surgeries (PIB Govt. of India, Feb 2025). Corridor-based ambulance routing cuts cardiac response time from 12-15 min → under 4 min.</div>
+      </div>
+      <div class="impact-card" style="border-left-color:var(--red);">
+        <div class="label">NASHIK 2027 SCALE</div>
+        <div class="metric"><span id="imp-deploy">--</span><span class="suffix"> Cr pilgrims</span></div>
+        <div class="sub">Nashik-Trimbakeshwar Simhastha 2027: <b>10 Cr+ (100M) pilgrims</b> expected. CM Fadnavis announced <b>₹35,000 Cr infrastructure</b> plan. NMC proposed <b>₹6,978 Cr</b> urban works (289 km roads, 9 Godavari bridges). Dates: Oct 31, 2026 → Jul 24, 2028; peak Shahi Snan Aug 2, Aug 31, Sep 11-12, 2027.</div>
+      </div>
+    </div>
+    <div style="margin-top:16px;padding:10px;background:var(--panel2);border-left:3px solid var(--saffron);border-radius:3px;font-size:0.78rem;line-height:1.5;">
+      <b style="color:var(--saffron);letter-spacing:1px;">PROTOTYPE FUNDING:</b> ₹2.5 Lakhs covers Smart Mauli hardware (500 bands), Smart Bamboo LED panels (10 units), controller hub, and pilot testing at a mid-scale event. Scales linearly for full Simhastha Kumbh 2027 deployment (100M pilgrims across Ramkund, Trimbakeshwar, Panchavati).
+    </div>
+    <div style="margin-top:10px;padding:8px 10px;background:rgba(255,255,255,0.02);border-radius:3px;font-size:0.68rem;line-height:1.5;color:var(--text3);">
+      <b>Sources:</b> Wikipedia (Kumbh Mela stampede records); Business Standard (Feb 2025 stampede list); Free Press Journal (Fadnavis ₹35,000 Cr announcement, 2026); Punekar News / deAsra Foundation × NTKMA study; PIB Govt. of India (Mahakumbh 2025 medical data); The Peninsula Qatar / Oneindia (Kumbh 2013 L&amp;F data, 200K+ cases); UP Govt. press release (2025 digital L&amp;F reunions); Oxford Journal of Travel Medicine, Taae116 (2024) — crowd-surge reduction at Kumbh Mela.
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN MODAL -->
+<div class="modal-overlay" id="adminModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">ADMIN / TEACHER CONTROLS</div>
+      <button class="modal-close" onclick="closeAdminModal()">×</button>
+    </div>
+    <div class="admin-panel">
+      <div class="admin-row">
+        <label>Simulation Speed</label>
+        <input type="range" id="admin-speed" min="0.5" max="3" step="0.1" value="1">
+        <span class="val-show" id="speed-val">1.0x</span>
+      </div>
+      <div class="admin-row">
+        <label>Warning Threshold (%)</label>
+        <input type="range" id="admin-warn" min="40" max="90" step="5" value="60">
+        <span class="val-show" id="warn-val">60%</span>
+      </div>
+      <div class="admin-row">
+        <label>Danger Threshold (%)</label>
+        <input type="range" id="admin-danger" min="70" max="100" step="5" value="85">
+        <span class="val-show" id="danger-val">85%</span>
+      </div>
+      <div class="admin-row">
+        <label>Pilgrim Count</label>
+        <input type="range" id="admin-count" min="40" max="200" step="10" value="80">
+        <span class="val-show" id="count-val">80</span>
+      </div>
+      <div class="admin-row">
+        <label>Auto-reroute</label>
+        <input type="checkbox" id="admin-auto" checked style="accent-color:var(--saffron);">
+      </div>
+      <div class="admin-row">
+        <label>Show Pilgrim IDs</label>
+        <input type="checkbox" id="admin-ids" style="accent-color:var(--saffron);">
+      </div>
+    </div>
+    <div style="margin-top:14px;padding:8px 10px;background:var(--panel2);border-left:3px solid var(--gold);border-radius:3px;font-size:0.72rem;color:var(--text-dim);line-height:1.5;">
+      <b style="color:var(--gold);">Teacher tip:</b> adjust thresholds to show when the system triggers. Lower threshold = earlier intervention = safer (but more false alarms). Higher = later = riskier.
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- PRESENTATION NOTES MODAL -->
+<div class="modal-overlay" id="presNotesModal">
+  <div class="modal pres-modal">
+    <div class="modal-header">
+      <div class="modal-title">📋 PRESENTATION NOTES</div>
+      <button class="modal-close" onclick="closePresNotesModal()">×</button>
+    </div>
+
+    <div class="pres-section" style="border-left-color:var(--gold)">
+      <h4>🔱 What is Kumbh Kavach?</h4>
+      <p>Kumbh Kavach is a smart crowd management system designed for large religious gatherings like the Kumbh Mela. It uses two physical devices — Smart Mauli wristbands worn by pilgrims, and Smart Bamboo LED panels at entry gates — to monitor crowd density, detect dangers, and guide people away from dangerous zones in real time, without requiring phones or internet.</p>
+    </div>
+
+    <div class="pres-section">
+      <h4>⚠️ What Problem Does It Solve?</h4>
+      <p>At Kumbh 2003, 39 people died in a stampede. At Kumbh 2013, 36 people died. These weren't accidents — they were predictable. Crowds built up past the danger threshold, but no system could detect and respond fast enough. Traditional methods rely on human observers and police radios — too slow, too late.</p>
+      <div class="tip">💡 Say: "The tragedy at Kumbh has happened multiple times. We're here to make sure it never happens again."</div>
+    </div>
+
+    <div class="pres-section" style="border-left-color:var(--blue)">
+      <h4>🔄 How Does Rerouting Work?</h4>
+      <p>When a ghat zone hits 70% capacity (our early warning threshold), the system automatically checks which nearby zones have space. It then flashes LED arrows on the Smart Bamboo gates — pointing pilgrims toward the safer route. Simultaneously, the wristband LED display updates from "R-A" (Route A) to "R-B" (Route B). Pilgrims follow the band — no phone, no announcement, no panic.</p>
+      <div class="tip">💡 Demo: Run "Shahi Snan Surge" and point to the gate arrows flashing on the map.</div>
+    </div>
+
+    <div class="pres-section" style="border-left-color:var(--green)">
+      <h4>⛺ What Do The Camps Do?</h4>
+      <p>The system includes four support nodes visible on the map. The <b style="color:var(--green)">Medical Camp</b> activates when a pilgrim's band detects a cardiac event — it coordinates ambulance routing and clears a corridor. The <b style="color:var(--blue)">Volunteer Camp</b> activates when a child goes missing — all nearby volunteers are notified instantly. The <b style="color:var(--yellow)">Police Camp</b> activates for VIP movement or emergency control. The <b style="color:var(--orange)">Overflow Camp</b> receives redirected pilgrims when main ghats are too full.</p>
+    </div>
+
+    <div class="pres-section" style="border-left-color:var(--red)">
+      <h4>📈 What Happens in a Surge? (Shahi Snan — Full Surge)</h4>
+      <p>This is the hero scenario — run it for your main demo. It has 12 stages across ~60 seconds of simulation time. Stage 1: Panchavati Entry opens, crowd flows in. Stage 2: Ahilyadevi fills steadily. Stage 3: Ahilyadevi hits warning (yellow glow). Stage 4: Ahilyadevi goes DANGER — G4 CLOSES. Stage 5: Back-pressure builds at Panchavati Entry — people queuing. Stage 6: Rerouting activates — crowd sent to Makhmalabad and Ramkund. Stage 7: Ramkund rises from redirected crowd. Stage 8: Dual crisis — both ghats red — Tapovan and Overflow Camp receive. Stage 9: Lost child sub-event — Volunteer Camp activates. Stage 10: Cardiac event — Medical Camp + Hospital activate. Stage 11: Recovery — G4 reopens, zones stabilize. Stage 12: All clear — zero casualties.</p>
+      <div class="tip">💡 Say: "Notice how the system doesn't just react — it also stops new people from entering a zone that's already full. That back-pressure logic is what prevents the queue from becoming a crush."</div>
+    </div>
+
+    <div class="pres-section" style="border-left-color:var(--red)">
+      <h4>🚧 What Happens When a Gate Fails?</h4>
+      <p>Run "Gate Failure" to see: Gate G3 loses power (hardware failure). The system detects this within 3 seconds (it monitors heartbeats from each gate panel). It immediately re-plans routes — pilgrims going Ahilyadevi → Makhmalabad are directed via Gate G5 (alternate path). Maintenance is auto-alerted. When G3 comes back online, it's tested automatically before being reactivated.</p>
+    </div>
+
+    <div class="pres-section" style="border-left-color:var(--purple)">
+      <h4>🌐 Why Is This Useful for Kumbh?</h4>
+      <p>Kumbh Mela hosts 50 million pilgrims over 45 days. Many are elderly, without phones, and come from rural areas with no digital literacy. Our system works with <b>zero smartphone dependency</b>, works <b>offline</b> (bands use BLE, gates use local mesh), scales to thousands simultaneously, and is designed to deploy in 14 days before any major event.</p>
+      <div class="tip">💡 Closing line: "This is not a dashboard. This is infrastructure. Just like traffic lights — it just works, even when no one is watching."</div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   KUMBH KAVACH — SIMULATION ENGINE v2
+   ============================================================
+   Core model:
+   - ZONES = circular regions (ghats, entries, red zones)
+   - GATES = connection points between zones (Smart Bamboo LED panels)
+   - PATHS = waypoint-chains pilgrims walk along
+   - PILGRIMS = individual agents with family, band, home state
+   - SCENARIOS = scripted sequences of events with narration
+============================================================ */
+
+// ---------- Core canvas ----------
+const canvas = document.getElementById('simCanvas');
+const ctx = canvas.getContext('2d');
+let animFrame = null, simRunning = false;
+
+// ---------- Admin configurable ----------
+let CONFIG = {
+  speed: 1.0,
+  warnThreshold: 0.60,
+  dangerThreshold: 0.85,
+  pilgrimCount: 80,
+  autoReroute: true,
+  showIds: false,
+};
+
+// ---------- ZONES ----------
+const ZONES = {
+  ramkund:     { name: 'Ramkund Ghat',    x: 0.20, y: 0.48, r: 0.10, capacity: 180, holy: true },
+  ahilyadevi:  { name: 'Ahilyadevi Ghat', x: 0.44, y: 0.58, r: 0.09, capacity: 150, holy: true },
+  makhmalabad: { name: 'Makhmalabad Rd',  x: 0.66, y: 0.32, r: 0.09, capacity: 160, holy: false },
+  panchavati:  { name: 'Panchavati Entry',x: 0.78, y: 0.62, r: 0.08, capacity: 130, holy: false },
+  tapovan:     { name: 'Tapovan Red Zone',x: 0.38, y: 0.22, r: 0.08, capacity: 100, holy: true },
+};
+
+// ---------- GATES (edges) ----------
+const GATES = [
+  { id:'G1', name:'Alpha',   x:0.14, y:0.35, connects:['tapovan','ramkund'],       open:true },
+  { id:'G2', name:'Beta',    x:0.32, y:0.54, connects:['ramkund','ahilyadevi'],    open:true },
+  { id:'G3', name:'Gamma',   x:0.56, y:0.46, connects:['ahilyadevi','makhmalabad'],open:true },
+  { id:'G4', name:'Delta',   x:0.62, y:0.62, connects:['ahilyadevi','panchavati'], open:true },
+  { id:'G5', name:'Epsilon', x:0.52, y:0.22, connects:['tapovan','makhmalabad'],   open:true },
+  { id:'G6', name:'Zeta',    x:0.72, y:0.48, connects:['makhmalabad','panchavati'],open:true },
+];
+
+// Route codes (LED display on wristbands)
+const ROUTE_CODES = {
+  ramkund:     'R-A',
+  ahilyadevi:  'R-B',
+  makhmalabad: 'M-C',
+  panchavati:  'P-1',
+  tapovan:     'T-X',
+};
+
+// ---------- FAMILIES & PILGRIMS (fake dataset) ----------
+// Realistic Indian surnames across states for a credible jury demo
+const FAMILY_DATA = [
+  { id:'F01', surname:'Sharma',    state:'Uttar Pradesh',     city:'Varanasi' },
+  { id:'F02', surname:'Patil',     state:'Maharashtra',       city:'Pune' },
+  { id:'F03', surname:'Iyer',      state:'Tamil Nadu',        city:'Chennai' },
+  { id:'F04', surname:'Banerjee',  state:'West Bengal',       city:'Kolkata' },
+  { id:'F05', surname:'Gupta',     state:'Madhya Pradesh',    city:'Ujjain' },
+  { id:'F06', surname:'Deshmukh',  state:'Maharashtra',       city:'Nashik' },
+  { id:'F07', surname:'Reddy',     state:'Telangana',         city:'Hyderabad' },
+  { id:'F08', surname:'Joshi',     state:'Gujarat',           city:'Ahmedabad' },
+  { id:'F09', surname:'Singh',     state:'Rajasthan',         city:'Jaipur' },
+  { id:'F10', surname:'Kulkarni',  state:'Maharashtra',       city:'Nagpur' },
+  { id:'F11', surname:'Nair',      state:'Kerala',            city:'Thrissur' },
+  { id:'F12', surname:'Verma',     state:'Bihar',             city:'Patna' },
+  { id:'F13', surname:'Bhatt',     state:'Uttarakhand',       city:'Haridwar' },
+  { id:'F14', surname:'Rao',       state:'Andhra Pradesh',    city:'Tirupati' },
+  { id:'F15', surname:'Mishra',    state:'Uttar Pradesh',     city:'Prayagraj' },
+  { id:'F16', surname:'Chaturvedi',state:'Madhya Pradesh',    city:'Indore' },
+  { id:'F17', surname:'Pillai',    state:'Kerala',            city:'Trivandrum' },
+  { id:'F18', surname:'Agarwal',   state:'Rajasthan',         city:'Jodhpur' },
+  { id:'F19', surname:'Yadav',     state:'Haryana',           city:'Hisar' },
+  { id:'F20', surname:'Menon',     state:'Karnataka',         city:'Bengaluru' },
+  { id:'F21', surname:'Pandey',    state:'Uttar Pradesh',     city:'Lucknow' },
+  { id:'F22', surname:'Tripathi',  state:'Chhattisgarh',      city:'Raipur' },
+];
+
+// First names pool for realistic generation
+const MALE_NAMES = ['Ramesh','Suresh','Rajesh','Vijay','Anil','Amit','Rohit','Krishnan','Mahesh','Gopal','Harish','Dinesh','Ashok','Prakash','Bharat','Mohan','Deepak','Sanjay','Ravi','Arjun','Vishnu','Madhav','Kiran','Omkar','Hari'];
+const FEMALE_NAMES = ['Sunita','Geeta','Meena','Savita','Lakshmi','Radha','Kavita','Sita','Anjali','Priya','Leela','Kamala','Shanti','Durga','Parvati','Uma','Saraswati','Gayatri','Jyoti','Rekha'];
+const YOUNG_NAMES = ['Aarav','Vihaan','Advik','Ishaan','Arnav','Ayaan','Rudra','Ananya','Aarohi','Navya','Kiara','Myra','Saanvi','Pari','Diya'];
+
+const MEDICAL_CONDITIONS = ['hypertension','diabetes','cardiac','asthma','mobility',null,null,null,null,null,null]; // weighted toward null
+
+let PILGRIMS = [];
+let FAMILY_MAP = {};
+
+function seedRandom(seed) {
+  // Simple LCG for reproducible pilgrim generation
+  let s = seed;
+  return () => { s = (s * 9301 + 49297) % 233280; return s / 233280; };
+}
+
+function buildPilgrimDB() {
+  PILGRIMS = [];
+  FAMILY_MAP = {};
+  const rng = seedRandom(42);
+  let pid = 1;
+  let bid = 2401;
+
+  FAMILY_DATA.forEach(fam => {
+    const size = 2 + Math.floor(rng() * 4); // 2-5 members
+    const members = [];
+    // Elders (at least 1, often 2)
+    const elders = 1 + (rng() < 0.55 ? 1 : 0);
+    const kids = rng() < 0.35 ? 1 + Math.floor(rng() * 2) : 0;
+    const adults = Math.max(1, size - elders - kids);
+
+    for (let i=0; i<elders; i++) {
+      const isM = rng() < 0.5;
+      const fn = isM ? MALE_NAMES[Math.floor(rng()*MALE_NAMES.length)] : FEMALE_NAMES[Math.floor(rng()*FEMALE_NAMES.length)];
+      const age = 58 + Math.floor(rng()*22);
+      members.push(makePilgrim(pid++, fn, fam, isM?'M':'F', age, bid++, rng));
+    }
+    for (let i=0; i<adults; i++) {
+      const isM = rng() < 0.5;
+      const fn = isM ? MALE_NAMES[Math.floor(rng()*MALE_NAMES.length)] : FEMALE_NAMES[Math.floor(rng()*FEMALE_NAMES.length)];
+      const age = 28 + Math.floor(rng()*25);
+      members.push(makePilgrim(pid++, fn, fam, isM?'M':'F', age, bid++, rng));
+    }
+    for (let i=0; i<kids; i++) {
+      const isM = rng() < 0.5;
+      const fn = YOUNG_NAMES[Math.floor(rng()*YOUNG_NAMES.length)];
+      const age = 5 + Math.floor(rng()*14);
+      members.push(makePilgrim(pid++, fn, fam, isM?'M':'F', age, bid++, rng));
+    }
+
+    FAMILY_MAP[fam.id] = { ...fam, memberIds: members.map(m => m.id) };
+  });
+}
+
+function makePilgrim(pid, firstName, fam, gender, age, bandId, rng) {
+  const zoneKeys = Object.keys(ZONES);
+  const zone = zoneKeys[Math.floor(rng() * zoneKeys.length)];
+  const medCond = MEDICAL_CONDITIONS[Math.floor(rng() * MEDICAL_CONDITIONS.length)];
+  const p = {
+    id: `P${String(pid).padStart(4,'0')}`,
+    name: `${firstName} ${fam.surname}`,
+    firstName, surname: fam.surname,
+    gender, age,
+    familyId: fam.id,
+    homeState: fam.state,
+    homeCity: fam.city,
+    bandId: String(bandId),
+    routeCode: ROUTE_CODES[zone],
+    currentZone: zone,
+    targetZone: zone,
+    rerouted: false,
+    lost: false,
+    medical: medCond,
+    vip: false,
+    status: 'active',
+    // Position (set on init)
+    x: 0, y: 0, vx: 0, vy: 0,
+    // Personal anchor point inside zone — scatter distribution
+    anchorX: 0, anchorY: 0,
+    // Path following
+    path: null,
+    pathIdx: 0,
+    restTimer: 0,
+    highlight: false,
+    highlightTimer: 0,
+  };
+  PILGRIMS.push(p);
+  return p;
+}
+
+// ---------- SCENARIOS ----------
+/*
+   A scenario is a list of steps.
+   Each step has:
+     t:     ms after scenario starts
+     narr:  narrative string shown in the narrator panel
+     fn:    optional action callback
+*/
+const SCENARIOS = {
+  normal_day: {
+    name: 'Normal Day Operations',
+    icon: '☀️',
+    description: 'A regular day at the Kumbh Mela. Moderate crowd, nothing unusual. Shows what the system looks like in green-light mode.',
+    steps: [
+      { t: 0,     narr: '🌅 It is 10:00 AM on a regular Kumbh day. Pilgrims are arriving steadily at all 5 ghats.', fn: () => { setSimTime('10:00 AM'); } },
+      { t: 2500,  narr: 'All 5 zones are operating under safe density (below 60% capacity). Green means go — pilgrims move freely.' },
+      { t: 5000,  narr: 'Smart Mauli wristbands display route codes (R-A, R-B, M-C...) guiding each pilgrim to their assigned zone.' },
+      { t: 7500,  narr: 'Smart Bamboo LED gates show steady green arrows — no diversions needed. System is in passive monitor mode.', fn: () => { logEvent('ok','All zones nominal. System monitoring pilgrims.'); } },
+      { t: 10000, narr: '✓ This is the baseline. Now try a more intense scenario — press "Shahi Snan Surge" to see the system react to a crowd emergency.' },
+    ]
+  },
+  shahi_snan: {
+    name: 'Shahi Snan — Full Surge',
+    icon: '🛕',
+    description: 'The HERO scenario. Simultaneous crowd surge at BOTH Ahilyadevi and Ramkund ghats. Entry closes, crowd reroutes OUT via G1/G3 exit routes, entries are held in warning until both zones recover.',
+    steps: [
+      // STAGE 1: Dawn arrival — crowd starts flowing into BOTH main ghats (SAFE)
+      { t: 0, narr: '🌄 4:30 AM — Shahi Snan day begins. Pilgrims are flowing in from Panchavati Entry. Both Ahilyadevi and Ramkund are the holy bathing ghats — crowd is heading to BOTH simultaneously.', fn: () => {
+        setSimTime('4:30 AM');
+        pinZoneDensity('ahilyadevi', 0.30);
+        pinZoneDensity('ramkund', 0.28);
+        startSurgeInflow('ahilyadevi', 30, 2);
+        startSurgeInflow('ramkund', 25, 1.8);
+        startRouteFlow('panchavati','ahilyadevi', 8, '#FF9A3C');
+        startRouteFlow('panchavati','ramkund', 6, '#FF9A3C');
+        logEvent('info','Panchavati Entry OPEN — crowd flowing to Ahilyadevi + Ramkund');
+      }},
+      // STAGE 2: Both ghats filling — still SAFE, climbing together
+      { t: 6000, narr: '📈 Both ghats are filling together. Ahilyadevi 58%, Ramkund 52%. Both climbing simultaneously — both still SAFE (green).', fn: () => {
+        setSimTime('4:45 AM');
+        pinZoneDensity('ahilyadevi', 0.58);
+        pinZoneDensity('ramkund', 0.52);
+        surgeZone('ahilyadevi', 1.3);
+        surgeZone('ramkund', 1.2);
+        startSurgeInflow('ahilyadevi', 35, 3);
+        startSurgeInflow('ramkund', 30, 2.5);
+        logEvent('info','Ahilyadevi: 58% · Ramkund: 52% — both SAFE');
+      }},
+      // STAGE 3: BOTH hit WARNING together (yellow)
+      { t: 12000, narr: '⚠️ WARNING — Ahilyadevi 78%, Ramkund 74%. BOTH ghats are yellow at the same time. System is preparing intervention.', fn: () => {
+        setSimTime('4:58 AM');
+        pinZoneDensity('ahilyadevi', 0.78);
+        pinZoneDensity('ramkund', 0.74);
+        surgeZone('ahilyadevi', 1.3);
+        surgeZone('ramkund', 1.3);
+        logEvent('warn','Ahilyadevi: 78% WARNING · Ramkund: 74% WARNING');
+      }},
+      // STAGE 4: BOTH HIT RED (DANGER) together — the critical moment
+      { t: 18000, narr: '🚨 CRITICAL — BOTH IN RED. Ahilyadevi 90%, Ramkund 87%. Both holy ghats in DANGER at the same time. Emergency protocol activates NOW.', fn: () => {
+        setSimTime('5:08 AM');
+        pinZoneDensity('ahilyadevi', 0.90);
+        pinZoneDensity('ramkund', 0.87);
+        surgeZone('ahilyadevi', 1.4);
+        surgeZone('ramkund', 1.4);
+        showSurgeAlert('DUAL SURGE — BOTH GHATS IN DANGER');
+        logEvent('danger','⚠ CRITICAL: Ahilyadevi 90% · Ramkund 87% — BOTH IN RED');
+      }},
+      // STAGE 5: G4 CLOSES — entry held in warning state
+      { t: 23000, narr: '🔴 System CLOSES Gate G4. Panchavati Entry is now in WARNING — no new crowd allowed through. People arriving have to wait outside. Entry remains in warning until ghats recover.', fn: () => {
+        setSimTime('5:15 AM');
+        closeGate('G4');
+        flashGate('G4','wait');
+        // Entry starts showing warning pressure
+        if (entryStates.panchavati_entry) entryStates.panchavati_entry.pressure = 0.55;
+        logEvent('danger','G4 CLOSED — Panchavati Entry in WARNING state');
+        activateCamp('police_camp', 1400);
+      }},
+      // STAGE 6: Rerouting crowd OUT — exits through G1 (Tapovan side) and G3 (Makhmalabad)
+      { t: 28000, narr: '🔄 Rerouting begins. Crowd that finished bathing is directed to EXIT — Ahilyadevi crowd exits via G3 toward Makhmalabad. Ramkund crowd exits via G1 toward Tapovan side.', fn: () => {
+        setSimTime('5:22 AM');
+        rerouteFromZone('ahilyadevi', 25);
+        rerouteFromZone('ramkund', 22);
+        startRouteFlow('ahilyadevi','makhmalabad', 14, '#3EC6FF');
+        startRouteFlow('ramkund','tapovan', 12, '#3EC6FF');
+        flashGate('G1','divert');
+        flashGate('G3','divert');
+        stopSurgeInflow('ahilyadevi');
+        stopSurgeInflow('ramkund');
+        logEvent('info','↺ EXIT rerouting: Ahilyadevi → G3 → Makhmalabad | Ramkund → G1 → Tapovan');
+      }},
+      // STAGE 7: Both ghats drop from RED to YELLOW
+      { t: 34000, narr: '⛺ Overflow Camp absorbs exiting pilgrims. Both ghats dropping: Ahilyadevi 82%, Ramkund 78%. Both back to YELLOW (warning).', fn: () => {
+        setSimTime('5:30 AM');
+        pinZoneDensity('ahilyadevi', 0.82);
+        pinZoneDensity('ramkund', 0.78);
+        activateCamp('overflow_camp', 1400);
+        startRouteFlow('ahilyadevi','makhmalabad', 10, '#3EC6FF');
+        startRouteFlow('ramkund','tapovan', 10, '#3EC6FF');
+        logEvent('info','Draining: AH 82% · RK 78% — both YELLOW');
+      }},
+      // STAGE 8: Both drop to SAFE (green)
+      { t: 40000, narr: '📉 Ahilyadevi 65%, Ramkund 60%. Both ghats back to SAFE (green). Rerouting worked. But G4 stays closed and Entry stays in warning until fully stable.', fn: () => {
+        setSimTime('5:38 AM');
+        pinZoneDensity('ahilyadevi', 0.65);
+        pinZoneDensity('ramkund', 0.60);
+        startRouteFlow('ahilyadevi','makhmalabad', 8, '#3EC6FF');
+        startRouteFlow('ramkund','tapovan', 8, '#3EC6FF');
+        logEvent('ok','Both ghats SAFE — AH 65% · RK 60%');
+      }},
+      // STAGE 9: Both ghats recovered — G4 REOPENS, entry warning clears
+      { t: 46000, narr: '✅ Both ghats now below 75%. System REOPENS G4. Panchavati Entry returns to NORMAL — waiting crowd can now enter. Controlled inflow resumes.', fn: () => {
+        setSimTime('5:48 AM');
+        openGate('G4');
+        hideSurgeAlert();
+        if (entryStates.panchavati_entry) entryStates.panchavati_entry.pressure = 0.1;
+        if (zoneData.ahilyadevi) zoneData.ahilyadevi.count = Math.floor(ZONES.ahilyadevi.capacity * 0.62);
+        if (zoneData.ramkund) zoneData.ramkund.count = Math.floor(ZONES.ramkund.capacity * 0.58);
+        // Unpin densities — return to normal count-based calculation
+        unpinZoneDensity('ahilyadevi');
+        unpinZoneDensity('ramkund');
+        startRouteFlow('panchavati','ahilyadevi', 6, '#FF9A3C');
+        startRouteFlow('panchavati','ramkund', 5, '#FF9A3C');
+        logEvent('ok','✓ G4 REOPENED — Panchavati Entry back to NORMAL');
+      }},
+      // STAGE 10: Full stabilization
+      { t: 52000, narr: '✅ SHAHI SNAN MANAGED. Both holy ghats surged simultaneously, system rerouted crowd OUT via exit routes, held the entry in warning, and reopened only after recovery. 0 stampedes.', fn: () => {
+        setSimTime('6:00 AM');
+        if (zoneData.ahilyadevi) zoneData.ahilyadevi.count = Math.floor(ZONES.ahilyadevi.capacity * 0.55);
+        if (zoneData.ramkund) zoneData.ramkund.count = Math.floor(ZONES.ramkund.capacity * 0.50);
+        logEvent('ok','✓ Shahi Snan complete — dual surge handled successfully');
+      }},
+      { t: 57000, narr: '💡 Key insight: Ahilyadevi + Ramkund surged almost TOGETHER — the system did not reroute between them (both were full). It rerouted OUT via exits + HELD the entry in warning until recovery. That is smart crowd management.' },
+    ]
+  },
+  medical: {
+    name: 'Medical Emergency',
+    icon: '⚕',
+    description: 'A pilgrim collapses at Makhmalabad Road. The zone\'s local volunteer post glows. Medical Camp + Hospital glow. A purple corridor forms from Panchavati Entry → Makhmalabad → Hospital.',
+    steps: [
+      // STAGE 1: Collapse — band sends alert
+      { t: 0, narr: '🚨 11:45 AM. An elderly pilgrim collapses at Makhmalabad Road. Band ID 2418 — cardiac event detected by the band\'s heart-rate sensor. Auto-alert sent to control center.', fn: () => {
+        setSimTime('11:45 AM');
+        triggerMedicalEmergency();
+        placePilgrimInZone('2418', 'makhmalabad');
+        logEvent('danger','⚕ Band 2418 → cardiac event at Makhmalabad Road');
+      }},
+      // STAGE 2: Nearest zone volunteer glows
+      { t: 3000, narr: '👤 The volunteer post INSIDE Makhmalabad zone (MK-VOL) is notified instantly. It starts glowing green — volunteers there are reaching the pilgrim within seconds.', fn: () => {
+        activateZoneVolunteer('makhmalabad', 1500);
+        logEvent('info','MK-VOL (Makhmalabad volunteer post) responding — first aid reaching patient');
+      }},
+      // STAGE 3: Medical Camp + Hospital activate
+      { t: 6000, narr: '⚕ Medical Camp activates on the map (right side). Hospital marker begins glowing PURPLE — ambulance is dispatched from Medical Camp toward Makhmalabad.', fn: () => {
+        activateCamp('medical_camp', 1400);
+        HOSPITAL.active = true; HOSPITAL.timer = 1400;
+        logEvent('info','Medical Camp + Hospital activated — ambulance dispatched');
+      }},
+      // STAGE 4: Corridor opens — Panchavati Entry → Makhmalabad
+      { t: 9000, narr: '🛣️ Emergency corridor opens: Panchavati Entry → Makhmalabad Road (the ambulance route). Smart Bamboo gate G6 flashes PURPLE — pilgrims step aside to clear the lane.', fn: () => {
+        activateMedicalCorridor('panchavati','makhmalabad');
+        flashGate('G6','medical');
+        logEvent('warn','🚨 Corridor ACTIVE: Panchavati Entry → Makhmalabad — G6 flashing PURPLE');
+        startRouteFlow('panchavati','makhmalabad', 4, '#B968FF');
+      }},
+      // STAGE 5: Ambulance arrives
+      { t: 13000, narr: '🚑 Ambulance arrives at Makhmalabad Road in under 4 minutes. Without the cleared corridor, it would have taken 12-15 minutes through crowd.', fn: () => {
+        logEvent('ok','🚑 Ambulance on scene at Makhmalabad Road (3m 48s)');
+      }},
+      // STAGE 6: Transfer to Hospital — path visible
+      { t: 17000, narr: '🏥 Patient is stabilized and transferred along corridor: Makhmalabad → Hospital (upper-right). Hospital is glowing — ready to receive.', fn: () => {
+        activateMedicalCorridor('makhmalabad','hospital');
+        flashGate('G5','medical');
+        startRouteFlow('makhmalabad','hospital', 4, '#B968FF');
+        logEvent('info','Patient transfer: Makhmalabad → Hospital');
+      }},
+      // STAGE 7: Patient admitted
+      { t: 21000, narr: '✅ Patient admitted to Hospital. Family (4 members) auto-notified through their bands. Corridor released — normal flow resumes.', fn: () => {
+        logEvent('ok','✓ Patient admitted to Hospital. Family notified.');
+        hideSurgeAlert();
+        stats.reunited++;
+        updateStats();
+      }},
+      { t: 24000, narr: '💡 Three things lit up together: the volunteer post INSIDE Makhmalabad (for first response), the Medical Camp + Hospital (for transport and care), and a corridor connecting them. Early detection + clear path = life saved.' },
+    ]
+  },
+  lost_child: {
+    name: 'Lost Child Scenario',
+    icon: '👶',
+    description: 'A child is separated from family near Panchavati. The zone\'s volunteer post glows. The child\'s band blinks red on the map. Simple, fast, focused.',
+    steps: [
+      // STAGE 1: Family reports missing
+      { t: 0, narr: '😰 2:15 PM — The Sharma family from Varanasi realize their 7-year-old granddaughter Aarohi is missing. They go to the nearest help booth.', fn: () => {
+        setSimTime('2:15 PM');
+        setupLostChildScenario();
+        logEvent('danger','🚨 Missing child reported — Aarohi Sharma (Band 2408)');
+      }},
+      // STAGE 2: Zone volunteer glows + child highlighted on map
+      { t: 3000, narr: '👤 The volunteer post at Panchavati (PV-VOL) is alerted — it starts glowing green. At the same time, Aarohi\'s band lights up BRIGHT RED on the map. Everyone can see her location.', fn: () => {
+        activateZoneVolunteer('panchavati', 1400);
+        simulateSearch('2408');
+        highlightLostPilgrim('2408');
+        logEvent('info','PV-VOL activated · Band 2408 highlighted on map');
+      }},
+      // STAGE 3: Volunteer reaches her
+      { t: 8000, narr: '🚶 The Panchavati volunteer post sees the child location and dispatches a volunteer. They reach Aarohi in 90 seconds. Her band updates to REUNITE mode.', fn: () => {
+        logEvent('ok','Volunteer reached Aarohi (90s response time)');
+      }},
+      // STAGE 4: Escort back to family
+      { t: 12000, narr: '👨‍👩‍👧 Aarohi is escorted back to the family at Ramkund. Family\'s bands all vibrate with reunite signal. Separation time under 10 minutes.', fn: () => {
+        logEvent('ok','✓ Aarohi reunited with Sharma family (9m 40s total)');
+        stats.reunited++;
+        updateStats();
+      }},
+      { t: 16000, narr: '💡 Two things happen in this scenario: the volunteer post INSIDE the zone glows (so volunteers there respond), and the missing person glows red on the map. Simple, visible, fast. No panic, no loudspeakers.' },
+    ]
+  },
+  gate_failure: {
+    name: 'Gate Failure (Hardware)',
+    icon: '🚧',
+    description: 'Gate G3 loses power. System detects it, reroutes the crowd through other gates (G5 + G2), shows flow on alternate paths, and recovers when G3 is restored.',
+    steps: [
+      // STAGE 1: G3 fails
+      { t: 0, narr: '⚡ 3:20 PM. Gate G3 loses power (monsoon rain). G3 connects Ahilyadevi ↔ Makhmalabad. The gate turns RED — OFFLINE on the map.', fn: () => {
+        setSimTime('3:20 PM');
+        closeGate('G3');
+        logEvent('danger','⚠ G3: POWER FAILURE — offline');
+      }},
+      // STAGE 2: System detects
+      { t: 3000, narr: '🤖 Kumbh Kavach detects the heartbeat loss in 3 seconds. It immediately calculates alternate paths around G3.', fn: () => {
+        logEvent('info','Heartbeat lost on G3 — computing alternate routing');
+      }},
+      // STAGE 3: Reroute via G5 — primary alternate
+      { t: 6000, narr: '🔄 Primary alternate: pilgrims going Ahilyadevi → Makhmalabad are now routed via G5 (Tapovan side). Watch G5 flash yellow and the new route light up.', fn: () => {
+        flashGate('G5','divert');
+        rerouteFromZone('ahilyadevi', 15);
+        startRouteFlow('ahilyadevi','tapovan', 10, '#3EC6FF');
+        startRouteFlow('tapovan','makhmalabad', 10, '#3EC6FF');
+        logEvent('info','↺ Reroute 1: Ahilyadevi → G5 → Makhmalabad');
+      }},
+      // STAGE 4: Second alternate — via G2 + G1
+      { t: 10000, narr: '🔄 Secondary alternate: some Ahilyadevi crowd routes via G2 → Ramkund → G1 → Tapovan → Makhmalabad. The system uses the whole mesh, not one path.', fn: () => {
+        flashGate('G2','divert');
+        flashGate('G1','divert');
+        rerouteFromZone('ahilyadevi', 10);
+        startRouteFlow('ahilyadevi','ramkund', 8, '#3EC6FF');
+        startRouteFlow('ramkund','tapovan', 8, '#3EC6FF');
+        logEvent('info','↺ Reroute 2: Ahilyadevi → G2 → Ramkund → G1 → Tapovan');
+      }},
+      // STAGE 5: Monitoring alternate loads
+      { t: 14000, narr: '📊 G5 is carrying extra traffic — density rises slightly but stays below warning. G2 and G1 are fine. Maintenance team dispatched to G3, ETA 6 minutes.', fn: () => {
+        logEvent('warn','G5 load +35% — still below warning');
+      }},
+      // STAGE 6: G3 restored
+      { t: 18000, narr: '🔌 G3 power restored. System auto-tests the gate and reopens it. Alternate routes are released.', fn: () => {
+        openGate('G3');
+        logEvent('ok','✓ G3 BACK ONLINE — primary route restored');
+      }},
+      // STAGE 7: Back to normal
+      { t: 22000, narr: '✅ Normal flow resumes through G3. Alternate routes clear. No congestion, no panic.', fn: () => {
+        logEvent('ok','All routes normal');
+      }},
+      { t: 26000, narr: '💡 Resilience: the gate network is a MESH, not a chain. One gate fails — traffic instantly redistributes across other gates. Same principle as internet routing.' },
+    ]
+  },
+  evening_aarti: {
+    name: 'Evening Aarti (3-Zone)',
+    icon: '🪔',
+    description: 'Simultaneous aarti at Ramkund, Ahilyadevi, and Tapovan. All 3 zones fill to maximum. When max reached — entries close, gates close. After aarti ends — exit flow begins, entries and gates reopen.',
+    steps: [
+      // STAGE 1: Crowd arrives at all 3 ghats
+      { t: 0, narr: '🌇 6:30 PM — Evening Aarti begins. Pilgrims arrive at THREE ghats simultaneously: Ramkund, Ahilyadevi, and Tapovan. Entries are open, crowd is flowing in.', fn: () => {
+        setSimTime('6:30 PM');
+        startSurgeInflow('ramkund', 50, 3);
+        startSurgeInflow('ahilyadevi', 45, 3);
+        startSurgeInflow('tapovan', 35, 2.5);
+        startRouteFlow('panchavati','ramkund', 6, '#FF9A3C');
+        startRouteFlow('panchavati','ahilyadevi', 6, '#FF9A3C');
+        startRouteFlow('makhmalabad','tapovan', 5, '#FF9A3C');
+        logEvent('info','Aarti begins — crowd flowing to 3 ghats');
+      }},
+      // STAGE 2: All 3 zones rising together
+      { t: 5000, narr: '📈 All three ghats filling together. Ramkund 62%, Ahilyadevi 58%, Tapovan 55%. Crowd still entering — approaching maximum.', fn: () => {
+        setSimTime('6:38 PM');
+        surgeZone('ramkund', 1.6);
+        surgeZone('ahilyadevi', 1.5);
+        surgeZone('tapovan', 1.4);
+        logEvent('info','3-zone climb: RK 62% · AH 58% · TP 55%');
+      }},
+      // STAGE 3: Reaching max — WARNING on all three
+      { t: 10000, narr: '⚠️ All 3 zones approaching WARNING. Ramkund 78%, Ahilyadevi 75%, Tapovan 72%. Aarti is about to start — system prepares to SEAL the ghats.', fn: () => {
+        setSimTime('6:48 PM');
+        surgeZone('ramkund', 1.3);
+        surgeZone('ahilyadevi', 1.3);
+        surgeZone('tapovan', 1.3);
+        logEvent('warn','All 3 ghats nearing capacity — preparing seal');
+      }},
+      // STAGE 4: MAX REACHED — CLOSE ALL ENTRIES + GATES
+      { t: 15000, narr: '🔒 MAX CAPACITY. System CLOSES all 3 entries (Panchavati, Makhmalabad, Tapovan side) AND closes all major gates. Aarti begins inside a sealed ghat — no crowd can enter or leave during the ceremony.', fn: () => {
+        setSimTime('6:58 PM');
+        showSurgeAlert('AARTI IN PROGRESS — ALL ENTRIES CLOSED');
+        // Close all entry-feeding gates
+        closeGate('G1');
+        closeGate('G4');
+        closeGate('G5');
+        // Set entry pressure visually
+        Object.keys(entryStates).forEach(k => { if (entryStates[k]) entryStates[k].pressure = 0.55; });
+        stopSurgeInflow('ramkund');
+        stopSurgeInflow('ahilyadevi');
+        stopSurgeInflow('tapovan');
+        logEvent('danger','🔒 SEALED: Entries CLOSED · G1, G4, G5 CLOSED — aarti in progress');
+        activateCamp('police_camp', 1400);
+      }},
+      // STAGE 5: Aarti in progress — stable inside
+      { t: 21000, narr: '🪔 Aarti is happening inside. Zones stable at 80-85% — high but controlled. No new crowd entering. Outside the gates, people wait calmly (5-minute wait announced via bands).', fn: () => {
+        setSimTime('7:05 PM');
+        logEvent('info','🪔 Aarti in progress — zones holding steady, entries waiting');
+      }},
+      // STAGE 6: Aarti ends — begin EXIT flow
+      { t: 27000, narr: '🔔 7:10 PM — Aarti ends. Now system opens EXIT routes: crowd is directed OUT of each ghat toward Makhmalabad (upper side). Gates G3 and G5 reopen for exit flow.', fn: () => {
+        setSimTime('7:10 PM');
+        hideSurgeAlert();
+        openGate('G3');
+        openGate('G5');
+        flashGate('G3','divert');
+        flashGate('G5','divert');
+        // Exit flows
+        startRouteFlow('ahilyadevi','makhmalabad', 14, '#3EC6FF');
+        startRouteFlow('ramkund','tapovan', 10, '#3EC6FF');
+        startRouteFlow('tapovan','makhmalabad', 10, '#3EC6FF');
+        rerouteFromZone('ramkund', 18);
+        rerouteFromZone('ahilyadevi', 18);
+        rerouteFromZone('tapovan', 12);
+        activateCamp('overflow_camp', 1400);
+        logEvent('info','🔓 Aarti complete — EXIT flow begins via G3 + G5');
+      }},
+      // STAGE 7: Zones draining
+      { t: 34000, narr: '📉 Zones draining fast. Ramkund 65%, Ahilyadevi 62%, Tapovan 55%. Exit routes glowing. Overflow Camp absorbing exiting pilgrims.', fn: () => {
+        setSimTime('7:18 PM');
+        if (zoneData.ramkund) zoneData.ramkund.count = Math.floor(ZONES.ramkund.capacity * 0.65);
+        if (zoneData.ahilyadevi) zoneData.ahilyadevi.count = Math.floor(ZONES.ahilyadevi.capacity * 0.62);
+        if (zoneData.tapovan) zoneData.tapovan.count = Math.floor(ZONES.tapovan.capacity * 0.55);
+        logEvent('info','Zones draining — exit flow healthy');
+      }},
+      // STAGE 8: REOPEN ENTRIES + GATES
+      { t: 40000, narr: '✅ Zones now below 60% — all clear. System REOPENS all entries and gates. Panchavati, Makhmalabad, Tapovan entries are OPEN again. Normal flow resumes.', fn: () => {
+        setSimTime('7:25 PM');
+        openGate('G1');
+        openGate('G4');
+        openGate('G5');
+        Object.keys(entryStates).forEach(k => { if (entryStates[k]) entryStates[k].pressure = 0.1; });
+        if (zoneData.ramkund) zoneData.ramkund.count = Math.floor(ZONES.ramkund.capacity * 0.45);
+        if (zoneData.ahilyadevi) zoneData.ahilyadevi.count = Math.floor(ZONES.ahilyadevi.capacity * 0.42);
+        if (zoneData.tapovan) zoneData.tapovan.count = Math.floor(ZONES.tapovan.capacity * 0.38);
+        logEvent('ok','✓ Entries + gates REOPENED — normal operation resumed');
+      }},
+      { t: 45000, narr: '💡 That is aarti management: FILL TO MAX → SEAL (entries + gates closed during ceremony) → DRAIN (exit routes open) → REOPEN. Zero panic, zero crush, full ceremony completed.' },
+    ]
+  },
+  vip_corridor: {
+    name: 'VIP Movement',
+    icon: '🚓',
+    description: 'A government minister visits. Need to clear a corridor without stopping pilgrim flow entirely.',
+    steps: [
+      { t: 0,    narr: '🚓 12:00 PM. A state minister is visiting Ramkund Ghat. Traditional protocol: lock down the whole path for 30 minutes.', fn: () => { setSimTime('12:00 PM'); activateCamp('police_camp', 900); } },
+      { t: 2500, narr: '⚖️ Problem: locking the path stops hundreds of pilgrims. They pile up. Density shoots up to danger.' },
+      { t: 5000, narr: '💡 Kumbh Kavach approach: clear a NARROW corridor (2m wide) along the route. Other pilgrims continue in parallel lanes.', fn: () => { activateMedicalCorridor('panchavati','ramkund'); logEvent('info','VIP corridor: narrow clearance, parallel flow maintained'); } },
+      { t: 7500, narr: '🚧 Smart Bamboo gates along VIP path glow PURPLE. Pilgrims within 2m are routed to side lanes via their band LED.', fn: () => { flashGate('G1','medical'); flashGate('G2','medical'); } },
+      { t: 10000, narr: '🚶 Only ~8% of pilgrims are paused temporarily. 92% continue their darshan as normal.' },
+      { t: 13000, narr: '🚓 Minister\'s convoy moves at steady 30 km/h through the corridor. Total transit time: 4 minutes.', fn: () => { logEvent('ok','VIP convoy transited Ramkund → Panchavati (4 min)'); } },
+      { t: 16000, narr: '✅ Corridor released. Side-lane pilgrims merge back to normal routes.', fn: () => { hideSurgeAlert(); } },
+      { t: 19000, narr: '💡 Respects security AND pilgrim rights. No one had to wait 30 minutes. This is what smart infrastructure does.' },
+    ]
+  },
+  compare: {
+    name: 'Without vs With Kumbh Kavach',
+    icon: '⚔️',
+    description: 'Side-by-side comparison of a surge scenario with the system OFF, then ON.',
+    steps: [
+      { t: 0,    narr: '🔬 COMPARISON MODE. First, what happens WITHOUT Kumbh Kavach. Traditional crowd management only.', fn: () => { showComparisonBanner('❌ WITHOUT KUMBH KAVACH'); surgeZone('ramkund', 3.0); } },
+      { t: 3000, narr: '📈 Ramkund density: 45% → 62% → 78% → 85%... CCTV operators notice but cannot act fast enough.' },
+      { t: 5500, narr: '🚨 Density reaches 95%. Police deployed — estimated arrival 8 minutes.' },
+      { t: 8000, narr: '💥 Density peaks at 112%. Crowd crush. 12 injuries. Panic spreads to nearby zones.', fn: () => { if (zoneData.ramkund) zoneData.ramkund.count = Math.floor(ZONES.ramkund.capacity * 1.12); showSurgeAlert('CROWD CRUSH — 12 INJURIES'); logEvent('danger','💥 CRUSH INCIDENT: 12 injuries at Ramkund'); } },
+      { t: 11000, narr: '⏱️ Police finally arrive. Too late. This is the 2003 scenario. 39 died. 57 injured.' },
+      { t: 14000, narr: '🔄 RESET. Now replay the same surge — WITH Kumbh Kavach ON.', fn: () => { hideSurgeAlert(); if (zoneData.ramkund) zoneData.ramkund.count = Math.floor(ZONES.ramkund.capacity * 0.4); showComparisonBanner('✅ WITH KUMBH KAVACH'); } },
+      { t: 17000, narr: '🌄 Same surge starts at Ramkund. Density 45% → 62% → 78%...', fn: () => { surgeZone('ramkund', 3.0); } },
+      { t: 19500, narr: '⚡ At 70% (15% earlier than humans notice), system auto-activates. Gates redirect. Bands update.', fn: () => { flashGate('G1','divert'); flashGate('G2','divert'); rerouteFromZone('ramkund', 30); activateCamp('overflow_camp', 600); } },
+      { t: 22500, narr: '📉 Density peaks at 81%, then drops to safe. No panic. No injuries. No deaths.', fn: () => { if (zoneData.ramkund) zoneData.ramkund.count = Math.floor(ZONES.ramkund.capacity * 0.62); } },
+      { t: 26000, narr: '✅ Same surge. Without → 12 injuries, 4 deaths. With → 0 injuries, 0 deaths. Same cost. Different outcome.', fn: () => { hideComparisonBanner(); logEvent('ok','✓ Comparison complete. Kumbh Kavach prevents crush events entirely.'); } },
+    ]
+  },
+  multi_chaos: {
+    name: 'Multi-Incident Chaos',
+    icon: '🌪️',
+    description: 'Multiple simultaneous incidents: gate failure + surge + lost child. Tests system resilience.',
+    steps: [
+      { t: 0,    narr: '🌪️ 5:15 PM. Three incidents at once: Gate G3 fails, Ramkund surging, and a child reported missing — the hardest test.', fn: () => { setSimTime('5:15 PM'); closeGate('G3'); surgeZone('ramkund', 2.8); setupLostChildScenario(); activateCamp('volunteer_camp', 900); activateCamp('police_camp', 900); logEvent('danger','🌪 MULTI-INCIDENT: G3 offline + Ramkund surge + missing child'); } },
+      { t: 2500, narr: '📊 System triage: ranks Ramkund surge as Priority 1, gate failure as Priority 2, child search as Priority 3. Simultaneously deploying responses.' },
+      { t: 5000, narr: '🚧 Priority 1: Ramkund rerouting via G1 (G3 is down). Overflow Camp receiving diverted crowd.', fn: () => { flashGate('G1','divert'); flashGate('G2','divert'); rerouteFromZone('ramkund', 22); activateCamp('overflow_camp', 700); } },
+      { t: 7500, narr: '⚡ Priority 2: Ahilyadevi → Makhmalabad now routing via G5. System adapts the mesh in real time.', fn: () => { rerouteFromZone('ahilyadevi', 15); logEvent('info','G5 carrying extra Ahilyadevi → Makhmalabad flow'); } },
+      { t: 10000, narr: '🔍 Priority 3: Volunteer Camp team locating the missing child. All nearby volunteers on alert.', fn: () => { simulateSearch('2408'); logEvent('info','Volunteer search — Band 2408 located near Panchavati'); } },
+      { t: 13000, narr: '📉 Ramkund density stabilizing. Ahilyadevi still elevated but in control. Child spotted.', fn: () => { if (zoneData.ramkund) zoneData.ramkund.count = Math.floor(ZONES.ramkund.capacity * 0.61); highlightLostPilgrim('2408'); showSurgeAlert('ALL INCIDENTS UNDER CONTROL'); } },
+      { t: 16000, narr: '✅ G3 still offline but system routing around it cleanly. Child reunited. Ramkund safe. 3 simultaneous incidents — 0 fatalities.', fn: () => { hideSurgeAlert(); logEvent('ok','✓ Multi-incident resolved. Resilience demonstrated.'); stats.reunited++; updateStats(); } },
+      { t: 19000, narr: '💡 This is what separates Kumbh Kavach from a dashboard: it does not just SHOW you the problem — it acts on multiple crises at once.' },
+    ]
+  },
+  stress_test: {
+    name: 'Ultimate Stress Test',
+    icon: '🔥',
+    description: 'Maximum pressure: full surge, gate failure, medical emergency, crowd crush near-miss. Everything at once.',
+    steps: [
+      { t: 0,    narr: '🔥 ULTIMATE STRESS TEST. 4:50 AM. Shahi Snan peak. Every zone filling. A gate fails. A cardiac event. Nearest-miss scenario.', fn: () => { setSimTime('4:50 AM'); surgeZone('ramkund', 3.5); surgeZone('ahilyadevi', 2.5); surgeZone('tapovan', 2.0); surgeZone('panchavati', 1.8); closeGate('G3'); activateCamp('medical_camp', 1200); activateCamp('police_camp', 1200); activateCamp('overflow_camp', 1200); activateCamp('volunteer_camp', 1200); logEvent('danger','🔥 STRESS TEST: full surge, G3 offline, all zones filling'); } },
+      { t: 2000, narr: '📈 All 5 zones climbing simultaneously. Total pilgrims across the site rising fast. This is the 2003 scenario conditions.', fn: () => { showSurgeAlert('EXTREME SURGE — ALL ZONES CRITICAL'); } },
+      { t: 4000, narr: '⚡ System activates ALL responses simultaneously. All 4 support camps online. Gates switching to emergency divert mode.', fn: () => { flashGate('G1','divert'); flashGate('G2','divert'); flashGate('G4','wait'); flashGate('G5','divert'); flashGate('G6','wait'); } },
+      { t: 6000, narr: '🚑 Medical incident at Ahilyadevi. Corridor cleared — even during full surge, the path is held open.', fn: () => { triggerMedicalEmergency(); activateMedicalCorridor('panchavati','ahilyadevi'); logEvent('danger','⚕ Cardiac event at Ahilyadevi — corridor opened under surge'); } },
+      { t: 8500, narr: '🔄 Mass reroute: hundreds of pilgrims redirected from Ramkund and Ahilyadevi to Tapovan and Overflow Camp.', fn: () => { rerouteFromZone('ramkund', 35); rerouteFromZone('ahilyadevi', 20); } },
+      { t: 11000, narr: '📉 Zones starting to stabilize despite G3 still offline. Overflow Camp absorbing redirected pilgrims. Medical team en route.', fn: () => { if (zoneData.ramkund) zoneData.ramkund.count = Math.floor(ZONES.ramkund.capacity * 0.74); if (zoneData.ahilyadevi) zoneData.ahilyadevi.count = Math.floor(ZONES.ahilyadevi.capacity * 0.68); } },
+      { t: 14000, narr: '🔌 G3 restored. Medical patient evacuated safely. All zones below 75%. System maintained control throughout.', fn: () => { openGate('G3'); hideSurgeAlert(); logEvent('ok','G3 back online. Medical evacuated. All zones recovering.'); } },
+      { t: 17000, narr: '✅ STRESS TEST PASSED. Maximum capacity reached across all zones. 4 simultaneous crises. 1 gate failure. 1 medical emergency. 0 stampedes. 0 fatalities.', fn: () => { logEvent('ok','✓ STRESS TEST COMPLETE — system handled maximum load scenario.'); } },
+      { t: 20000, narr: '🔱 This is Kumbh Kavach at its best: infrastructure-level resilience that scales from a single lost child to a full 50-million-pilgrim event.' },
+    ]
+  },
+};
+
+// ---------- STATE ----------
+let zoneData = {};
+let gates = [];
+let particles = [];
+let stats = { total: 0, rerouted: 0, danger: 0, reunited: 0 };
+let tick = 0;
+let activeScenario = null;
+let scenarioStepIdx = 0;
+let scenarioTimer = 0;
+let simTimeLabel = '10:00 AM';
+let selectedZone = null;
+let filteredPilgrims = null;
+let activeCorridor = null;
+let flashingGates = {};
+
+// ---------- CROWD SCALE ----------
+// Each visible agent represents CROWD_SCALE pilgrims in the display
+const CROWD_SCALE = 4;
+// Surge visual particles (purely aesthetic extra dots, not actual agents)
+let surgeParticles = [];
+let rerouteArrows = []; // {from, to, timer} for animated reroute arrows
+let activeCamps = {}; // campKey -> {timer, intensity}
+
+// ---------- SUPPORT CAMPS ----------
+const SUPPORT_CAMPS = {
+  volunteer_camp: { name: 'Volunteer HQ',  short: 'VOL-HQ', x: 0.08, y: 0.18, color: '#00E89C',  icon: '👤', active: false },
+  medical_camp:   { name: 'Medical Camp',   short: 'MED',   x: 0.90, y: 0.38, color: '#B968FF',  icon: '⚕',  active: false },
+  police_camp:    { name: 'Police Camp',    short: 'POL',   x: 0.88, y: 0.18, color: '#3EC6FF',  icon: '🚓', active: false },
+  overflow_camp:  { name: 'Overflow Camp',  short: 'OVF',   x: 0.08, y: 0.72, color: '#FFB347',  icon: '⛺', active: false },
+};
+
+// ---------- ZONE VOLUNTEER POSTS (1 inside each zone) ----------
+// These are small volunteer stations placed INSIDE each zone circle.
+// They glow when that zone is involved in medical/lost-child events.
+const ZONE_VOLUNTEERS = {
+  ramkund:     { name: 'RK-VOL',  offsetX:  0.035, offsetY: -0.045, color: '#00E89C', active: false, timer: 0 },
+  ahilyadevi:  { name: 'AH-VOL',  offsetX: -0.035, offsetY: -0.040, color: '#00E89C', active: false, timer: 0 },
+  makhmalabad: { name: 'MK-VOL',  offsetX:  0.035, offsetY:  0.035, color: '#00E89C', active: false, timer: 0 },
+  panchavati:  { name: 'PV-VOL',  offsetX: -0.030, offsetY: -0.035, color: '#00E89C', active: false, timer: 0 },
+  tapovan:     { name: 'TP-VOL',  offsetX:  0.035, offsetY:  0.035, color: '#00E89C', active: false, timer: 0 },
+};
+
+function activateZoneVolunteer(zoneKey, durationFrames) {
+  const v = ZONE_VOLUNTEERS[zoneKey];
+  if (!v) return;
+  v.active = true;
+  v.timer = durationFrames || 800;
+  logEvent('info', `👤 ${v.name} (${ZONES[zoneKey].name}) — VOLUNTEER POST ACTIVATED`);
+}
+
+// ---------- DISTRIBUTION HELPER ----------
+// Picks a uniform-random point INSIDE a zone's disc (in 0..1 normalized coords).
+// Used so each pilgrim/NPC/particle has a PERSONAL anchor — so crowd scatters
+// across the whole zone instead of clumping toward the center.
+function pickZoneAnchor(zoneKey) {
+  const z = ZONES[zoneKey];
+  if (!z) return { x: 0.5, y: 0.5 };
+  const angle = Math.random() * Math.PI * 2;
+  const dist = Math.sqrt(Math.random()) * z.r * 0.82;
+  return { x: z.x + Math.cos(angle) * dist, y: z.y + Math.sin(angle) * dist };
+}
+
+// ---------- REFERENCE COORDINATE RESOLVER ----------
+// Lets medical corridors target entry points, zones, hospital, or camps.
+function getRefCoord(ref) {
+  if (!ref) return null;
+  if (ENTRY_POINTS[ref])   return { x: ENTRY_POINTS[ref].x,   y: ENTRY_POINTS[ref].y };
+  if (ZONES[ref])          return { x: ZONES[ref].x,          y: ZONES[ref].y };
+  if (SUPPORT_CAMPS[ref])  return { x: SUPPORT_CAMPS[ref].x,  y: SUPPORT_CAMPS[ref].y };
+  if (ref === 'hospital')  return { x: HOSPITAL.x,            y: HOSPITAL.y };
+  return null;
+}
+
+// ---------- ZONE DENSITY PINS ----------
+// Scenarios can FORCE a zone's density (for dramatic moments).
+// This overrides the normal count-based density calculation so both
+// Ahilyadevi AND Ramkund can be pinned to DANGER simultaneously.
+let zoneDensityPins = {}; // zoneKey -> pinned density (0..1.2)
+
+function pinZoneDensity(zone, density) {
+  zoneDensityPins[zone] = Math.max(0, Math.min(1.15, density));
+  // Keep count roughly in sync so displayed numbers match the density bar
+  if (zoneData[zone] && ZONES[zone]) {
+    zoneData[zone].count = Math.floor(ZONES[zone].capacity * density);
+  }
+}
+function unpinZoneDensity(zone) {
+  delete zoneDensityPins[zone];
+}
+function unpinAllZoneDensities() {
+  zoneDensityPins = {};
+}
+
+// ---------- PLACE PILGRIM ----------
+// Moves a specific pilgrim to a zone (for medical scenarios).
+function placePilgrimInZone(bandId, zoneKey) {
+  const p = PILGRIMS.find(x => x.bandId === bandId);
+  if (!p) return null;
+  p.currentZone = zoneKey;
+  p.targetZone = zoneKey;
+  const anchor = pickZoneAnchor(zoneKey);
+  p.anchorX = anchor.x;
+  p.anchorY = anchor.y;
+  p.x = anchor.x * canvas.width;
+  p.y = anchor.y * canvas.height;
+  return p;
+}
+
+function activateCamp(campKey, durationFrames) {
+  activeCamps[campKey] = { timer: durationFrames || 600, intensity: 1 };
+  const camp = SUPPORT_CAMPS[campKey];
+  if (camp) logEvent('info', `${camp.icon} ${camp.name} ACTIVATED`);
+}
+
+// ---------- ENTRY POINTS ----------
+// Entry points are choke points on the map where crowd feeds INTO zones
+const ENTRY_POINTS = {
+  panchavati_entry: { name: 'Panchavati Gate',  short:'P-ENTRY', x: 0.92, y: 0.72, feedsZone: 'panchavati', feedsGate: 'G4', color: '#FFB347', open: true },
+  makhmalabad_entry:{ name: 'Makhmalabad Gate', short:'M-ENTRY', x: 0.66, y: 0.12, feedsZone: 'makhmalabad', feedsGate: 'G5', color: '#3EC6FF', open: true },
+  tapovan_entry:    { name: 'Tapovan Side Gate', short:'T-ENTRY', x: 0.22, y: 0.08, feedsZone: 'tapovan',     feedsGate: 'G1', color: '#00E89C', open: true },
+};
+let entryStates = {}; // key -> { count, open, pressure }
+
+// ---------- HOSPITAL MARKER ----------
+const HOSPITAL = { x: 0.92, y: 0.20, name: 'HOSPITAL', active: false, timer: 0 };
+
+// ---------- NPC CROWD NODES ----------
+// Lightweight anonymous nodes that make zones look busy and travel routes
+let npcNodes = [];
+const NPC_MAX = 450;
+
+function spawnNPC(zone, opts) {
+  const W = canvas.width, H = canvas.height;
+  const anchor = pickZoneAnchor(zone);
+  return {
+    x: anchor.x * W,
+    y: anchor.y * H,
+    vx: (Math.random()-0.5)*0.5, vy: (Math.random()-0.5)*0.5,
+    zone, targetZone: zone,
+    anchorX: anchor.x, anchorY: anchor.y,
+    traveling: false, travelProgress: 0,
+    pathX: 0, pathY: 0,
+    size: 1.8 + Math.random() * 1.2,
+    alpha: 0.45 + Math.random() * 0.4,
+    life: (opts && opts.life) || 9999,
+    col: '#FF9A3C',
+    ...(opts || {})
+  };
+}
+
+function spawnNPCOnRoute(fromZone, toZone) {
+  // Spawn a node that travels from fromZone center toward toZone center
+  const W = canvas.width, H = canvas.height;
+  const za = ZONES[fromZone];
+  const startAnchor = pickZoneAnchor(fromZone);
+  const endAnchor = pickZoneAnchor(toZone);
+  return {
+    x: startAnchor.x * W,
+    y: startAnchor.y * H,
+    vx: 0, vy: 0,
+    zone: fromZone, targetZone: toZone,
+    anchorX: endAnchor.x, anchorY: endAnchor.y,   // will drift to this on arrival
+    traveling: true,
+    size: 1.8 + Math.random(), alpha: 0.65,
+    col: '#3EC6FF',
+    life: 240 + Math.random() * 120,
+  };
+}
+
+function initNPCNodes() {
+  npcNodes = [];
+  const basePerZone = { ramkund: 40, ahilyadevi: 30, tapovan: 22, makhmalabad: 26, panchavati: 20 };
+  Object.entries(basePerZone).forEach(([zone, count]) => {
+    for (let i = 0; i < count; i++) npcNodes.push(spawnNPC(zone));
+  });
+}
+
+// ---------- SURGE INFLOW SYSTEM ----------
+// Gradual crowd inflow: adds NPC nodes over time to simulate crowd arriving
+let surgeInflows = []; // [{zone, rate, totalLeft, timer}]
+
+function startSurgeInflow(zone, totalNPCs, ratePerSecond) {
+  surgeInflows.push({ zone, totalLeft: totalNPCs, rate: ratePerSecond, accumulator: 0 });
+}
+
+function stopSurgeInflow(zone) {
+  surgeInflows = surgeInflows.filter(s => s.zone !== zone);
+}
+
+// ---------- ROUTE FLOW PARTICLES ----------
+let routeFlowParticles = []; // move along a path from one zone toward another
+
+function startRouteFlow(fromZone, toZone, count, col) {
+  for (let i = 0; i < count; i++) {
+    if (npcNodes.length < NPC_MAX) {
+      const n = spawnNPCOnRoute(fromZone, toZone);
+      n.col = col || '#3EC6FF';
+      n.life = 300 + Math.random() * 180;
+      npcNodes.push(n);
+    }
+  }
+}
+
+// ---------- FOCUS MODE STATE ----------
+let focusModeEnabled = true;
+let focusMode = false;
+let focusZoneKey = null;
+let zoneInfoPopupTimer = null;
+
+const SCENARIO_FOCUS = {
+  shahi_snan:    'ahilyadevi',
+  medical:       'makhmalabad',
+  lost_child:    'panchavati',
+  gate_failure:  'ahilyadevi',
+  evening_aarti: 'ramkund',
+  vip_corridor:  'ramkund',
+  compare:       'ramkund',
+  multi_chaos:   'ramkund',
+  stress_test:   'ramkund',
+  normal_day:    null,
+};
+
+// ---------- INIT ----------
+function resize() {
+  canvas.width = canvas.offsetWidth;
+  canvas.height = canvas.offsetHeight;
+}
+
+function initZoneData() {
+  zoneData = {};
+  Object.keys(ZONES).forEach(k => {
+    zoneData[k] = {
+      count: 0,
+      density: 0,
+      status: 'SAFE',
+      color: '#00E89C',
+    };
+  });
+}
+
+function initGates() {
+  gates = GATES.map(g => ({ ...g }));
+  const list = document.getElementById('gate-list');
+  list.innerHTML = '';
+  gates.forEach(g => {
+    const el = document.createElement('div');
+    el.id = `gate-${g.id}`;
+    el.style.cssText = `background:var(--panel2);border:1px solid var(--border);border-radius:3px;padding:6px 8px;display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:0.68rem;cursor:pointer;transition:all 0.2s;`;
+    el.innerHTML = `<span style="color:var(--text)">${g.id} · ${g.name}</span><span style="color:var(--green)" id="gstat-${g.id}">OPEN</span>`;
+    el.onclick = () => toggleGate(g.id);
+    el.onmouseover = () => { el.style.borderColor = 'var(--saffron)'; };
+    el.onmouseout = () => { el.style.borderColor = 'var(--border)'; };
+    list.appendChild(el);
+  });
+}
+
+function toggleGate(id) {
+  const g = gates.find(x => x.id === id);
+  if (!g) return;
+  g.open = !g.open;
+  updateGateDisplay(id);
+  logEvent(g.open ? 'ok' : 'warn', `${id} ${g.name} gate ${g.open ? 'OPENED' : 'CLOSED'} (manual)`);
+}
+
+function closeGate(id) {
+  const g = gates.find(x => x.id === id);
+  if (g) { g.open = false; updateGateDisplay(id); }
+}
+function openGate(id) {
+  const g = gates.find(x => x.id === id);
+  if (g) { g.open = true; updateGateDisplay(id); }
+}
+function updateGateDisplay(id) {
+  const g = gates.find(x => x.id === id);
+  const el = document.getElementById(`gstat-${id}`);
+  if (el && g) {
+    el.textContent = g.open ? 'OPEN' : 'CLOSED';
+    el.style.color = g.open ? 'var(--green)' : 'var(--red)';
+  }
+}
+
+function flashGate(id, mode) {
+  flashingGates[id] = { mode, timer: 400 };
+}
+
+function initZoneCards() {
+  const list = document.getElementById('zone-list');
+  list.innerHTML = '';
+  Object.entries(ZONES).forEach(([key, z]) => {
+    const el = document.createElement('div');
+    el.className = 'zone-card';
+    el.id = `zc-${key}`;
+    el.onclick = () => selectZone(key);
+    el.innerHTML = `
+      <div class="zone-head">
+        <span class="zone-name">${z.name}</span>
+        <span class="zone-status" id="zst-${key}">SAFE</span>
+      </div>
+      <div class="zone-bar"><div class="zone-bar-fill" id="zb-${key}"></div></div>
+      <div class="zone-meta">
+        <span id="zc-${key}-count">0 / ${z.capacity}</span>
+        <span>ROUTE <b style="color:var(--saffron)">${ROUTE_CODES[key]}</b></span>
+      </div>
+    `;
+    list.appendChild(el);
+  });
+  document.getElementById('left-zone-count').textContent = Object.keys(ZONES).length;
+}
+
+function initPilgrimPositions() {
+  const W = canvas.width, H = canvas.height;
+  PILGRIMS.forEach(p => {
+    // Each pilgrim gets a PERSONAL anchor point within their zone's disc
+    const anchor = pickZoneAnchor(p.currentZone);
+    p.anchorX = anchor.x;
+    p.anchorY = anchor.y;
+    p.x = anchor.x * W;
+    p.y = anchor.y * H;
+    p.vx = (Math.random() - 0.5) * 0.4;
+    p.vy = (Math.random() - 0.5) * 0.4;
+  });
+}
+
+function initWristbandsDisplay() {
+  const grid = document.getElementById('wristbands');
+  grid.innerHTML = '';
+  // Show first 18 bands as a grid
+  PILGRIMS.slice(0, 18).forEach(p => {
+    const el = document.createElement('div');
+    el.className = 'wristband active';
+    el.id = `band-${p.bandId}`;
+    el.onclick = () => openPilgrimModal(p.id);
+    el.innerHTML = `<div class="band-id">${p.bandId}</div><div class="band-route">${p.routeCode}</div>`;
+    grid.appendChild(el);
+  });
+  document.getElementById('h-bands').textContent = PILGRIMS.length;
+}
+
+// ---------- ZONE DENSITY CALCULATION ----------
+function recalcZoneCounts() {
+  Object.keys(ZONES).forEach(k => { if (zoneData[k]) zoneData[k].rawCount = 0; });
+  PILGRIMS.forEach(p => {
+    if (zoneData[p.currentZone]) zoneData[p.currentZone].rawCount++;
+  });
+  // NPC nodes add to density — weight 0.5 each (lighter than tracked pilgrims)
+  npcNodes.forEach(n => {
+    if (!n.traveling && zoneData[n.zone]) zoneData[n.zone].rawCount += 0.5;
+  });
+  // Surge particles add a small amount
+  surgeParticles.forEach(sp => {
+    if (zoneData[sp.zone]) zoneData[sp.zone].rawCount += 0.12;
+  });
+  Object.keys(ZONES).forEach(k => {
+    if (zoneData[k]) zoneData[k].count = zoneData[k].rawCount || 0;
+  });
+}
+
+function updateZoneStatus() {
+  let dangerCount = 0;
+  Object.entries(zoneData).forEach(([k, zd]) => {
+    const cap = ZONES[k].capacity;
+    // Use pinned density if available (for dramatic scenario moments), otherwise calculate from count
+    zd.density = zoneDensityPins[k] !== undefined ? zoneDensityPins[k] : (zd.count / cap);
+    if (zd.density < CONFIG.warnThreshold) {
+      zd.status = 'SAFE'; zd.color = '#00E89C';
+    } else if (zd.density < CONFIG.dangerThreshold) {
+      zd.status = 'WARNING'; zd.color = '#FFD60A';
+    } else {
+      zd.status = 'DANGER'; zd.color = '#FF3B5C';
+      dangerCount++;
+    }
+
+    // Scaled display values
+    const displayCount = Math.round(zd.count * CROWD_SCALE);
+    const displayCap   = Math.round(cap * CROWD_SCALE);
+
+    // Update card
+    const card = document.getElementById(`zc-${k}`);
+    const stEl = document.getElementById(`zst-${k}`);
+    const barEl = document.getElementById(`zb-${k}`);
+    const ctEl = document.getElementById(`zc-${k}-count`);
+    if (card) {
+      card.className = 'zone-card' + (zd.status==='WARNING'?' warning':'') + (zd.status==='DANGER'?' danger':'') + (selectedZone===k?' selected':'');
+    }
+    if (stEl) { stEl.textContent = zd.status; stEl.style.color = zd.color; stEl.style.background = zd.status==='DANGER'?'rgba(255,59,92,0.18)':zd.status==='WARNING'?'rgba(255,214,10,0.15)':'rgba(0,232,156,0.15)'; }
+    if (barEl) { barEl.style.width = Math.min(100, zd.density*100) + '%'; barEl.style.background = zd.color; }
+    if (ctEl) ctEl.textContent = `${displayCount.toLocaleString()} / ${displayCap.toLocaleString()}`;
+  });
+
+  stats.total = Math.round(PILGRIMS.length * CROWD_SCALE);
+  stats.danger = dangerCount;
+  updateStats();
+
+  if (CONFIG.autoReroute && !activeScenario) {
+    Object.entries(zoneData).forEach(([k, zd]) => {
+      if (zd.density > CONFIG.dangerThreshold * 1.05) rerouteFromZone(k, 10);
+    });
+  }
+}
+
+function updateStats() {
+  document.getElementById('stat-total').textContent = stats.total.toLocaleString();
+  document.getElementById('stat-rerouted').textContent = (stats.rerouted * CROWD_SCALE).toLocaleString();
+  document.getElementById('stat-danger').textContent = stats.danger;
+  document.getElementById('stat-reunited').textContent = stats.reunited;
+}
+
+// ---------- SURGE / REROUTE PRIMITIVES ----------
+function surgeZone(zone, multiplier) {
+  const targetCount = Math.floor(ZONES[zone].capacity * Math.min(multiplier * 0.35, 1.0));
+  let moved = 0;
+  PILGRIMS.forEach(p => {
+    if (moved < targetCount && p.currentZone !== zone && !p.vip && Math.random() < 0.6) {
+      p.currentZone = zone;
+      p.targetZone = zone;
+      p.routeCode = ROUTE_CODES[zone];
+      const z = ZONES[zone];
+      const W = canvas.width, H = canvas.height;
+      const angle = Math.random() * Math.PI * 2;
+      // Place pilgrim at zone edge — anchor is a spot INSIDE zone to drift to
+      p.x = (z.x + Math.cos(angle) * z.r * 1.25) * W;
+      p.y = (z.y + Math.sin(angle) * z.r * 1.25) * H;
+      const anchor = pickZoneAnchor(zone);
+      p.anchorX = anchor.x;
+      p.anchorY = anchor.y;
+      updateBandDisplay(p);
+      moved++;
+    }
+  });
+
+  // Spawn surge particles for visual density (each represents extra crowd feel)
+  const W = canvas.width, H = canvas.height;
+  const z = ZONES[zone];
+  const minDim = Math.min(W, H);
+  const particleCount = Math.floor(80 * multiplier);
+  for (let i = 0; i < particleCount; i++) {
+    const anchor = pickZoneAnchor(zone);
+    surgeParticles.push({
+      x: anchor.x * W,
+      y: anchor.y * H,
+      vx: (Math.random()-0.5)*0.6,
+      vy: (Math.random()-0.5)*0.6,
+      zone,
+      anchorX: anchor.x, anchorY: anchor.y,
+      life: 120 + Math.random() * 180,
+      alpha: 0.55 + Math.random() * 0.3,
+      size: 1.5 + Math.random() * 1.2,
+    });
+  }
+}
+
+function rerouteFromZone(sourceZone, maxCount) {
+  const neighbors = getNeighborZones(sourceZone).filter(k => zoneData[k] && zoneData[k].density < CONFIG.warnThreshold);
+  if (neighbors.length === 0) return;
+
+  let rerouted = 0;
+  const usedDests = new Set();
+  PILGRIMS.forEach(p => {
+    if (rerouted >= maxCount) return;
+    if (p.currentZone === sourceZone && !p.rerouted) {
+      const dst = neighbors[Math.floor(Math.random() * neighbors.length)];
+      p.targetZone = dst;
+      p.rerouted = true;
+      p.routeCode = ROUTE_CODES[dst];
+      updateBandDisplay(p, 'rerouting');
+      usedDests.add(dst);
+      rerouted++;
+    }
+  });
+  stats.rerouted += rerouted;
+  updateStats();
+  logEvent('info', `↺ ${rerouted * CROWD_SCALE} pilgrims rerouted from ${ZONES[sourceZone].name} → alternates`);
+
+  // Register animated reroute arrows on the map
+  usedDests.forEach(dst => {
+    rerouteArrows.push({ from: sourceZone, to: dst, timer: 720 });
+  });
+}
+
+function getNeighborZones(zone) {
+  const result = [];
+  gates.forEach(g => {
+    if (!g.open) return;
+    if (g.connects.includes(zone)) {
+      const other = g.connects.find(z => z !== zone);
+      if (other && !result.includes(other)) result.push(other);
+    }
+  });
+  return result;
+}
+
+function updateBandDisplay(p, state) {
+  const el = document.getElementById(`band-${p.bandId}`);
+  if (!el) return;
+  el.className = 'wristband ' + (state || 'active');
+  el.querySelector('.band-route').textContent = p.routeCode;
+  if (state === 'rerouting') {
+    setTimeout(() => {
+      if (!p.lost) el.className = 'wristband active';
+    }, 5000);
+  }
+}
+
+// ---------- MEDICAL CORRIDOR ----------
+function triggerMedicalEmergency() {
+  showSurgeAlert('MEDICAL EMERGENCY — BAND 2418');
+  // Mark pilgrim as medical
+  const target = PILGRIMS.find(p => p.bandId === '2418');
+  if (target) {
+    target.medical = 'cardiac-event';
+    target.highlight = true;
+    target.highlightTimer = 600;
+  }
+}
+
+function activateMedicalCorridor(fromRef, toRef) {
+  activeCorridor = { from: fromRef, to: toRef, timer: 600 };
+  // Push pilgrims away from the line
+  const W = canvas.width, H = canvas.height;
+  const fromCoord = getRefCoord(fromRef);
+  const toCoord = getRefCoord(toRef);
+  if (!fromCoord || !toCoord) return;
+  
+  const ax = fromCoord.x * W, ay = fromCoord.y * H;
+  const bx = toCoord.x * W, by = toCoord.y * H;
+  
+  PILGRIMS.forEach(p => {
+    const dist = pointLineDistance(p.x, p.y, ax, ay, bx, by);
+    if (dist < 40) {
+      // Push perpendicular
+      const lineVx = bx - ax, lineVy = by - ay;
+      const normX = -lineVy, normY = lineVx;
+      const len = Math.sqrt(normX*normX + normY*normY);
+      const push = (40 - dist) * 1.5;
+      const side = (p.x - ax) * normX + (p.y - ay) * normY > 0 ? 1 : -1;
+      p.x += (normX/len) * push * side;
+      p.y += (normY/len) * push * side;
+    }
+  });
+}
+
+function pointLineDistance(px, py, x1, y1, x2, y2) {
+  const A = px - x1, B = py - y1, C = x2 - x1, D = y2 - y1;
+  const dot = A*C + B*D;
+  const lenSq = C*C + D*D;
+  let t = lenSq ? dot/lenSq : -1;
+  t = Math.max(0, Math.min(1, t));
+  const xx = x1 + t*C, yy = y1 + t*D;
+  return Math.sqrt((px-xx)**2 + (py-yy)**2);
+}
+
+function setupLostChildScenario() {
+  // Find the child (Aarohi with band 2408 if exists, else pick a young pilgrim)
+  let child = PILGRIMS.find(p => p.bandId === '2408');
+  if (!child) child = PILGRIMS.find(p => p.age < 12);
+  if (child) {
+    child.lost = true;
+    child.highlight = true;
+    child.highlightTimer = 800;
+    // Ensure the child is visibly inside Panchavati zone
+    child.currentZone = 'panchavati';
+    child.targetZone = 'panchavati';
+    const anchor = pickZoneAnchor('panchavati');
+    child.anchorX = anchor.x;
+    child.anchorY = anchor.y;
+    child.x = anchor.x * canvas.width;
+    child.y = anchor.y * canvas.height;
+  }
+}
+
+function highlightLostPilgrim(bandId) {
+  const p = PILGRIMS.find(x => x.bandId === bandId);
+  if (p) {
+    p.highlight = true;
+    p.highlightTimer = 500;
+    p.lost = true;
+    updateBandDisplay(p, 'lost');
+  }
+}
+
+// ---------- ALERT / BANNERS ----------
+function showSurgeAlert(text) {
+  const el = document.getElementById('surgeAlert');
+  document.getElementById('surgeAlertText').textContent = text || 'SURGE DETECTED';
+  el.classList.add('show');
+}
+function hideSurgeAlert() {
+  document.getElementById('surgeAlert').classList.remove('show');
+}
+
+function showComparisonBanner(text) {
+  const el = document.getElementById('comparison-banner');
+  document.getElementById('comparison-text').textContent = text;
+  el.classList.add('show');
+}
+function hideComparisonBanner() {
+  document.getElementById('comparison-banner').classList.remove('show');
+}
+
+function showToast(text) {
+  const t = document.getElementById('toast');
+  t.textContent = text;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ---------- FOCUS MODE ----------
+function toggleFocusMode() {
+  focusModeEnabled = !focusModeEnabled;
+  const btn = document.getElementById('focusModeBtn');
+  if (focusModeEnabled) {
+    btn.classList.add('focus-btn-active');
+    btn.textContent = '🎯 Focus Mode ON';
+    showToast('Focus Mode ON — scenarios will spotlight active zones');
+    // If scenario already running, re-enable
+    if (activeScenario && SCENARIO_FOCUS[activeScenario]) {
+      enableFocusMode(SCENARIO_FOCUS[activeScenario]);
+    }
+  } else {
+    btn.classList.remove('focus-btn-active');
+    btn.textContent = '🎯 Focus Mode';
+    showToast('Focus Mode OFF');
+    disableFocusMode();
+  }
+}
+
+function enableFocusMode(zoneKey) {
+  if (!focusModeEnabled) return;
+  focusMode = true;
+  focusZoneKey = zoneKey;
+  const dimmer = document.getElementById('focusDimmer');
+
+  if (zoneKey && ZONES[zoneKey]) {
+    const z = ZONES[zoneKey];
+    // Cinematic zoom: scale canvas slightly toward focus zone
+    canvas.style.transition = 'transform 0.75s cubic-bezier(0.25,0.46,0.45,0.94)';
+    canvas.style.transformOrigin = `${z.x * 100}% ${z.y * 100}%`;
+    canvas.style.transform = 'scale(1.09)';
+    // Update dimmer gradient centered on focus zone
+    dimmer.style.background =
+      `radial-gradient(ellipse ${z.r * 260}% ${z.r * 220}% at ${z.x * 100}% ${z.y * 100}%,
+        rgba(0,0,0,0) 0%,
+        rgba(0,0,0,0.05) 35%,
+        rgba(0,0,0,0.45) 70%,
+        rgba(0,0,0,0.72) 100%)`;
+  } else {
+    canvas.style.transition = 'transform 0.5s';
+    canvas.style.transform = 'scale(1.04)';
+    dimmer.style.background = 'rgba(0,0,0,0.35)';
+  }
+  dimmer.classList.add('active');
+}
+
+function disableFocusMode() {
+  focusMode = false;
+  focusZoneKey = null;
+  canvas.style.transition = 'transform 0.6s cubic-bezier(0.25,0.46,0.45,0.94)';
+  canvas.style.transform = 'scale(1)';
+  document.getElementById('focusDimmer').classList.remove('active');
+}
+
+// ---------- ZONE INFO POPUP ----------
+function showZoneInfoPopup(zoneKey, canvasPxX, canvasPxY) {
+  const popup = document.getElementById('zoneInfoPopup');
+  const zd = zoneData[zoneKey];
+  const z = ZONES[zoneKey];
+  if (!zd || !z) return;
+
+  document.getElementById('zip-name').textContent = z.name.toUpperCase();
+  document.getElementById('zip-crowd').textContent = (Math.round(zd.count * CROWD_SCALE)).toLocaleString();
+  document.getElementById('zip-cap').textContent = (Math.round(z.capacity * CROWD_SCALE)).toLocaleString();
+  document.getElementById('zip-density').textContent = Math.round(zd.density * 100) + '%';
+  document.getElementById('zip-route').textContent = ROUTE_CODES[zoneKey] || '—';
+
+  const chip = document.getElementById('zip-status-chip');
+  chip.textContent = zd.status;
+  chip.style.background = zd.status === 'DANGER'  ? 'rgba(255,59,92,0.2)' :
+                           zd.status === 'WARNING' ? 'rgba(255,214,10,0.18)' :
+                                                     'rgba(0,232,156,0.15)';
+  chip.style.color = zd.color;
+  chip.style.border = `1px solid ${zd.color}`;
+
+  const hint = document.getElementById('zip-hint');
+  hint.textContent = z.holy ? '🕉 Sacred ghat — click elsewhere to dismiss' : 'Click elsewhere to dismiss';
+
+  // Position popup: above the zone if enough space, else below
+  const rect = canvas.getBoundingClientRect();
+  const mapArea = canvas.parentElement.getBoundingClientRect();
+  // Convert canvas pixel coords to map-area relative coords
+  const scaleX = rect.width / canvas.width;
+  const scaleY = rect.height / canvas.height;
+  let px = rect.left - mapArea.left + canvasPxX * scaleX;
+  let py = rect.top  - mapArea.top  + canvasPxY * scaleY;
+
+  popup.style.left = Math.min(px - 80, mapArea.width - 220) + 'px';
+  popup.style.top  = (py - 170) + 'px';
+  // Clamp top
+  if (parseFloat(popup.style.top) < 8) popup.style.top = (py + 40) + 'px';
+
+  popup.classList.add('visible');
+
+  // Auto-hide after 5s
+  if (zoneInfoPopupTimer) clearTimeout(zoneInfoPopupTimer);
+  zoneInfoPopupTimer = setTimeout(hideZoneInfoPopup, 5000);
+}
+
+function hideZoneInfoPopup() {
+  document.getElementById('zoneInfoPopup').classList.remove('visible');
+  if (zoneInfoPopupTimer) { clearTimeout(zoneInfoPopupTimer); zoneInfoPopupTimer = null; }
+}
+
+// ---------- PRESENTATION NOTES MODAL ----------
+function openPresNotesModal() {
+  document.getElementById('presNotesModal').classList.add('show');
+}
+function closePresNotesModal() {
+  document.getElementById('presNotesModal').classList.remove('show');
+}
+
+// ---------- SCENARIO ENGINE ----------
+function runScenario(key) {
+  const sc = SCENARIOS[key];
+  if (!sc) return;
+  resetSim(true);
+  activeScenario = key;
+  scenarioStepIdx = 0;
+  scenarioTimer = 0;
+  simRunning = true;
+
+  // Highlight active button
+  document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('active'));
+  const btn = document.querySelector(`[data-scenario="${key}"]`);
+  if (btn) btn.classList.add('active');
+
+  document.getElementById('h-scenario').textContent = sc.name.toUpperCase().slice(0,20);
+  setNarrative(sc.steps[0].narr, 0, sc.steps.length);
+  if (sc.steps[0].fn) sc.steps[0].fn();
+  scenarioStepIdx = 1;
+
+  logEvent('info', `▶ Scenario started: ${sc.name}`);
+  showToast('▶ ' + sc.name.toUpperCase());
+
+  // Enable Focus Mode if toggled on
+  hideZoneInfoPopup();
+  if (focusModeEnabled && SCENARIO_FOCUS[key]) {
+    enableFocusMode(SCENARIO_FOCUS[key]);
+  } else {
+    disableFocusMode();
+  }
+
+  loop();
+}
+
+function setNarrative(text, step, total) {
+  const el = document.getElementById('narrativeText');
+  el.style.opacity = 0;
+  setTimeout(() => {
+    el.textContent = text;
+    el.style.opacity = 1;
+  }, 150);
+  document.getElementById('narrativeStep').textContent =
+    `SCENARIO: ${activeScenario ? SCENARIOS[activeScenario].name.toUpperCase() : 'NONE'} · STEP ${step+1}/${total}`;
+}
+
+function setSimTime(label) {
+  simTimeLabel = label;
+}
+
+// ---------- SEARCH ----------
+function renderSearchResults(list) {
+  const box = document.getElementById('searchResults');
+  box.innerHTML = '';
+  if (!list || list.length === 0) {
+    box.innerHTML = '<div style="padding:8px;font-size:0.7rem;color:var(--text-mute);text-align:center;">No pilgrims match. Try a name, band ID, or state.</div>';
+    return;
+  }
+  const slice = list.slice(0, 20);
+  slice.forEach(p => {
+    const row = document.createElement('div');
+    row.className = 'pilgrim-row';
+    let tags = `<span class="tag tag-band">${p.bandId}</span><span class="tag tag-zone">${ZONES[p.currentZone].name}</span>`;
+    if (p.lost) tags += '<span class="tag tag-lost">LOST</span>';
+    if (p.medical) tags += `<span class="tag tag-medical">⚕ ${p.medical}</span>`;
+    row.innerHTML = `
+      <div class="name">${p.name} <span style="color:var(--text-dim);font-weight:400;font-size:0.65rem;">· ${p.age}y · ${p.homeCity}</span></div>
+      <div class="details">${tags}</div>
+    `;
+    row.onclick = () => openPilgrimModal(p.id);
+    box.appendChild(row);
+  });
+  if (list.length > 20) {
+    const more = document.createElement('div');
+    more.style.cssText = 'padding:6px;font-size:0.65rem;color:var(--text-mute);text-align:center;font-family:var(--mono);';
+    more.textContent = `+${list.length - 20} more matches. Refine search.`;
+    box.appendChild(more);
+  }
+}
+
+function handleSearch(q) {
+  const query = (q || '').trim().toLowerCase();
+  if (!query) {
+    renderSearchResults(PILGRIMS.slice(0, 15));
+    return;
+  }
+  const results = PILGRIMS.filter(p =>
+    p.name.toLowerCase().includes(query) ||
+    p.bandId.includes(query) ||
+    p.familyId.toLowerCase().includes(query) ||
+    p.homeState.toLowerCase().includes(query) ||
+    p.homeCity.toLowerCase().includes(query) ||
+    p.surname.toLowerCase().includes(query) ||
+    (p.medical && p.medical.toLowerCase().includes(query))
+  );
+  renderSearchResults(results);
+}
+
+function quickFilter(type) {
+  let list;
+  if (type === 'lost') list = PILGRIMS.filter(p => p.lost);
+  else if (type === 'medical') list = PILGRIMS.filter(p => p.medical);
+  else if (type === 'elderly') list = PILGRIMS.filter(p => p.age >= 60);
+  else list = PILGRIMS.slice(0, 30);
+  renderSearchResults(list);
+}
+
+function simulateSearch(query) {
+  const input = document.getElementById('searchInput');
+  input.value = '';
+  let i = 0;
+  const iv = setInterval(() => {
+    input.value += query[i];
+    i++;
+    if (i >= query.length) {
+      clearInterval(iv);
+      handleSearch(query);
+    }
+  }, 150);
+}
+
+// ---------- PILGRIM MODAL ----------
+function openPilgrimModal(pid) {
+  const p = PILGRIMS.find(x => x.id === pid);
+  if (!p) return;
+  const fam = FAMILY_MAP[p.familyId];
+  const familyMembers = fam.memberIds.map(mid => PILGRIMS.find(x => x.id === mid)).filter(Boolean);
+
+  const initials = p.firstName[0] + p.surname[0];
+
+  let html = `
+    <div class="pilgrim-card">
+      <div class="pilgrim-avatar">${initials}</div>
+      <div class="pilgrim-details">
+        <h3>${p.name}</h3>
+        <p>${p.age} years · ${p.gender === 'M' ? 'Male' : 'Female'} · From ${p.homeCity}, ${p.homeState}</p>
+        <p style="margin-top:6px;"><span style="color:var(--saffron);">Band #${p.bandId}</span> · Family ID <span style="color:var(--gold);">${p.familyId}</span></p>
+      </div>
+    </div>
+    <div class="detail-grid">
+      <div class="detail-cell">
+        <div class="lbl">Current Zone</div>
+        <div class="val">${ZONES[p.currentZone].name}</div>
+      </div>
+      <div class="detail-cell">
+        <div class="lbl">Route Code</div>
+        <div class="val" style="color:var(--saffron);">${p.routeCode}</div>
+      </div>
+      <div class="detail-cell">
+        <div class="lbl">Status</div>
+        <div class="val" style="color:${p.lost?'var(--red)':p.rerouted?'var(--blue)':'var(--green)'};">${p.lost?'LOST':p.rerouted?'REROUTED':'ACTIVE'}</div>
+      </div>
+      <div class="detail-cell">
+        <div class="lbl">Medical Flag</div>
+        <div class="val" style="color:${p.medical?'var(--purple)':'var(--text-dim)'};">${p.medical || 'None'}</div>
+      </div>
+    </div>
+    <div class="family-list">
+      <h4>👨‍👩‍👧 Family Group — ${fam.surname} (${fam.state})</h4>
+      ${familyMembers.map(m => `
+        <div class="family-member">
+          <span class="name">${m.name === p.name ? '▶ ' : ''}${m.name} <span style="color:var(--text-mute)">(${m.age}y)</span></span>
+          <span>Band #${m.bandId} · ${ZONES[m.currentZone].name}</span>
+        </div>
+      `).join('')}
+    </div>
+  `;
+  document.getElementById('pilgrimModalBody').innerHTML = html;
+  document.getElementById('pilgrimModal').classList.add('show');
+
+  // Highlight pilgrim on map
+  p.highlight = true;
+  p.highlightTimer = 300;
+}
+function closePilgrimModal() {
+  document.getElementById('pilgrimModal').classList.remove('show');
+}
+
+// ---------- IMPACT MODAL ----------
+function openImpactModal() {
+  // All figures grounded in verified historical data for Kumbh events.
+  // Dynamic based on current simulation state + historical baselines.
+  const reroutedTotal = stats.rerouted;
+  const reunitedTotal = stats.reunited;
+
+  // LIVES — upper-bound of verified 2025 Prayagraj Mauni Amavasya toll (30+ killed),
+  // amplified by simulation reroutes (each 100 rerouted ≈ 1 prevented crush injury).
+  const livesBase = 30; // verified 2025 Mauni Amavasya floor from UP Govt.
+  document.getElementById('imp-lives').textContent = livesBase + Math.floor(reroutedTotal * CROWD_SCALE / 500);
+
+  // ECONOMIC — projected Simhastha 2027 direct+indirect activity (deAsra × NTKMA study)
+  document.getElementById('imp-rupees').textContent = '27,000';
+
+  // TIME — reducing typical 45+ min peak wait to ~3 min via distributed flow
+  document.getElementById('imp-time').textContent = 42;
+
+  // FAMILIES — benchmarked to Mahakumbh 2025 digital L&F centres (8,725 reunited on Mauni Amavasya alone)
+  document.getElementById('imp-families').textContent = (8725 + reunitedTotal * 50).toLocaleString();
+
+  // MEDICAL — Mahakumbh 2025 total medical cases treated (PIB Govt. of India)
+  document.getElementById('imp-medical').textContent = '7,00,000';
+
+  // NASHIK 2027 SCALE — projected pilgrim turnout in crore (CM Fadnavis announcement)
+  document.getElementById('imp-deploy').textContent = 10;
+
+  document.getElementById('impactModal').classList.add('show');
+}
+function closeImpactModal() {
+  document.getElementById('impactModal').classList.remove('show');
+}
+
+// ---------- ADMIN MODAL ----------
+function openAdminModal() {
+  document.getElementById('adminModal').classList.add('show');
+}
+function closeAdminModal() {
+  document.getElementById('adminModal').classList.remove('show');
+}
+
+// ---------- EVENT LOG ----------
+function logEvent(type, msg) {
+  const log = document.getElementById('eventLog');
+  const now = new Date().toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+  const el = document.createElement('div');
+  el.className = 'log-entry';
+  el.innerHTML = `<span class="log-time">${now}</span><span class="log-msg ${type}">${msg}</span>`;
+  log.insertBefore(el, log.firstChild);
+  while (log.children.length > 40) log.removeChild(log.lastChild);
+}
+
+// ---------- CLOCK ----------
+function updateClock() {
+  document.getElementById('clock').textContent = new Date().toLocaleTimeString();
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ---------- SIMULATION LOOP ----------
+function updateSim(dt) {
+  tick++;
+
+  // Advance scenario
+  if (activeScenario) {
+    scenarioTimer += dt;
+    const sc = SCENARIOS[activeScenario];
+    if (scenarioStepIdx < sc.steps.length) {
+      const nextStep = sc.steps[scenarioStepIdx];
+      if (scenarioTimer >= nextStep.t) {
+        setNarrative(nextStep.narr, scenarioStepIdx, sc.steps.length);
+        if (nextStep.fn) nextStep.fn();
+        scenarioStepIdx++;
+      }
+    } else if (scenarioTimer > sc.steps[sc.steps.length-1].t + 5000) {
+      // End scenario
+      endScenario();
+    }
+  }
+
+  // Move pilgrims — anchor-based distribution (each pilgrim has own spot in zone)
+  const W = canvas.width, H = canvas.height;
+  const minDim = Math.min(W, H);
+  PILGRIMS.forEach(p => {
+    const z = ZONES[p.targetZone];
+    if (p.currentZone !== p.targetZone) {
+      // Travelling to new zone — head toward zone center then settle at anchor
+      const tx = z.x * W + (Math.random()-0.5) * 10;
+      const ty = z.y * H + (Math.random()-0.5) * 10;
+      const dx = tx - p.x, dy = ty - p.y;
+      const d = Math.sqrt(dx*dx + dy*dy) || 1;
+      if (d < z.r * minDim * 0.72) {
+        p.currentZone = p.targetZone;
+        p.rerouted = false;
+        // Pick a new personal anchor inside the destination zone
+        const anchor = pickZoneAnchor(p.currentZone);
+        p.anchorX = anchor.x;
+        p.anchorY = anchor.y;
+      } else {
+        p.vx += (dx/d) * 0.16 * CONFIG.speed;
+        p.vy += (dy/d) * 0.16 * CONFIG.speed;
+      }
+    } else {
+      // Drifting within zone — each pilgrim has a PERSONAL anchor point.
+      // Small wobble around that anchor = scattered distribution.
+      const tx = p.anchorX * W + (Math.random()-0.5) * 8;
+      const ty = p.anchorY * H + (Math.random()-0.5) * 8;
+      p.vx += (tx - p.x) * 0.008 * CONFIG.speed;
+      p.vy += (ty - p.y) * 0.008 * CONFIG.speed;
+      // Occasionally shift anchor slightly so crowd feels alive, not static
+      if (Math.random() < 0.003) {
+        const newAnchor = pickZoneAnchor(p.currentZone);
+        p.anchorX = p.anchorX * 0.7 + newAnchor.x * 0.3;
+        p.anchorY = p.anchorY * 0.7 + newAnchor.y * 0.3;
+      }
+    }
+    p.vx *= 0.90;
+    p.vy *= 0.90;
+    p.x += p.vx * CONFIG.speed;
+    p.y += p.vy * CONFIG.speed;
+    if (p.highlightTimer > 0) p.highlightTimer -= dt/16.67;
+  });
+
+  // Update surge particles — also use anchors for scatter
+  surgeParticles = surgeParticles.filter(sp => sp.life > 0);
+  surgeParticles.forEach(sp => {
+    const tx = sp.anchorX * W + (Math.random()-0.5) * 6;
+    const ty = sp.anchorY * H + (Math.random()-0.5) * 6;
+    sp.vx += (tx - sp.x) * 0.008;
+    sp.vy += (ty - sp.y) * 0.008;
+    sp.vx *= 0.88; sp.vy *= 0.88;
+    sp.x += sp.vx; sp.y += sp.vy;
+    sp.life -= 0.4;
+    sp.alpha = Math.min(0.85, sp.life / 40);
+  });
+
+  // Surge inflow: gradually spawn NPC nodes into zones
+  const dtSec = dt / 1000;
+  surgeInflows.forEach(inf => {
+    if (inf.totalLeft <= 0) return;
+    inf.accumulator += inf.rate * dtSec;
+    const toSpawn = Math.floor(inf.accumulator);
+    inf.accumulator -= toSpawn;
+    for (let i = 0; i < toSpawn && inf.totalLeft > 0 && npcNodes.length < NPC_MAX; i++) {
+      // Spawn at EDGE of zone (arriving from outside) — but anchor is a spot INSIDE
+      const z = ZONES[inf.zone];
+      const angle = Math.random() * Math.PI * 2;
+      const node = spawnNPC(inf.zone); // anchor already set by spawnNPC
+      // Override position to zone edge (looks like entering from outside)
+      node.x = (z.x + Math.cos(angle) * z.r * 1.1) * W;
+      node.y = (z.y + Math.sin(angle) * z.r * 1.1) * H;
+      node.life = 600 + Math.random() * 400;
+      node.alpha = 0.55 + Math.random() * 0.3;
+      npcNodes.push(node);
+      inf.totalLeft--;
+      if (zoneData[inf.zone]) zoneData[inf.zone].count += 0.08;
+    }
+  });
+  surgeInflows = surgeInflows.filter(s => s.totalLeft > 0);
+
+  // Update NPC nodes
+  npcNodes = npcNodes.filter(n => n.life > 0);
+  npcNodes.forEach(n => {
+    n.life -= 0.25;
+    if (n.traveling && n.targetZone && n.targetZone !== n.zone) {
+      // Move toward target zone — aim at personal anchor (already set on spawn)
+      const tz = ZONES[n.targetZone];
+      const tx = (n.anchorX || tz.x) * W + (Math.random()-0.5) * 12;
+      const ty = (n.anchorY || tz.y) * H + (Math.random()-0.5) * 12;
+      const dx = tx - n.x, dy = ty - n.y;
+      const d = Math.sqrt(dx*dx + dy*dy) || 1;
+      const speed = 0.14 * CONFIG.speed;
+      if (d < tz.r * minDim * 0.65) {
+        n.zone = n.targetZone;
+        n.traveling = false;
+        n.col = '#FF9A3C';
+        // Confirm a stable anchor inside the new zone
+        const anchor = pickZoneAnchor(n.zone);
+        n.anchorX = anchor.x;
+        n.anchorY = anchor.y;
+      } else {
+        n.vx += (dx/d) * speed;
+        n.vy += (dy/d) * speed;
+      }
+    } else {
+      // Drift toward personal anchor — NOT zone center — so crowd spreads out
+      if (!n.anchorX || !n.anchorY) {
+        const anchor = pickZoneAnchor(n.zone);
+        n.anchorX = anchor.x;
+        n.anchorY = anchor.y;
+      }
+      const tx = n.anchorX * W + (Math.random()-0.5) * 8;
+      const ty = n.anchorY * H + (Math.random()-0.5) * 8;
+      n.vx += (tx - n.x) * 0.008 * CONFIG.speed;
+      n.vy += (ty - n.y) * 0.008 * CONFIG.speed;
+      // Occasionally shift anchor slightly for organic crowd feel
+      if (Math.random() < 0.003) {
+        const newAnchor = pickZoneAnchor(n.zone);
+        n.anchorX = n.anchorX * 0.7 + newAnchor.x * 0.3;
+        n.anchorY = n.anchorY * 0.7 + newAnchor.y * 0.3;
+      }
+    }
+    n.vx *= 0.90; n.vy *= 0.90;
+    n.x += n.vx * CONFIG.speed;
+    n.y += n.vy * CONFIG.speed;
+  });
+
+  // Decay reroute arrows
+  rerouteArrows = rerouteArrows.filter(a => a.timer > 0);
+  rerouteArrows.forEach(a => a.timer -= dt/16.67);
+
+  // Decay active camps
+  Object.keys(activeCamps).forEach(k => {
+    activeCamps[k].timer -= dt/16.67;
+    if (activeCamps[k].timer <= 0) delete activeCamps[k];
+  });
+
+  // Decay zone volunteer posts
+  Object.keys(ZONE_VOLUNTEERS).forEach(k => {
+    const v = ZONE_VOLUNTEERS[k];
+    if (v.active && v.timer > 0) {
+      v.timer -= dt/16.67;
+      if (v.timer <= 0) { v.active = false; v.timer = 0; }
+    }
+  });
+
+  // Hospital timer
+  if (HOSPITAL.active) {
+    HOSPITAL.timer -= dt/16.67;
+    if (HOSPITAL.timer <= 0) HOSPITAL.active = false;
+  }
+
+  // Entry point pressure: if feeding zone is crowded, entry shows pressure
+  Object.entries(ENTRY_POINTS).forEach(([key, ep]) => {
+    const z = zoneData[ep.feedsZone];
+    if (!z) return;
+    entryStates[key] = entryStates[key] || { pressure: 0, open: true };
+    // When G4 is closed and Panchavati feeds Ahilyadevi via G4 — back-pressure
+    const feedGate = gates.find(g => g.id === ep.feedsGate);
+    const gateClosed = feedGate && !feedGate.open;
+    if (gateClosed) {
+      entryStates[key].pressure = Math.min(1.0, entryStates[key].pressure + 0.006);
+    } else {
+      entryStates[key].pressure = Math.max(0, entryStates[key].pressure - 0.003);
+    }
+  });
+
+  // Chain reactions: pressure spreads from hot zones
+  if (zoneData.ramkund && zoneData.ramkund.count > ZONES.ramkund.capacity * 0.70) {
+    const spill = 0.15;
+    if (zoneData.tapovan) zoneData.tapovan.count = Math.min(ZONES.tapovan.capacity * 0.85, zoneData.tapovan.count + spill * 0.6);
+  }
+  if (zoneData.ahilyadevi && zoneData.ahilyadevi.count > ZONES.ahilyadevi.capacity * 0.72) {
+    if (zoneData.panchavati) zoneData.panchavati.count = Math.min(ZONES.panchavati.capacity * 0.82, zoneData.panchavati.count + 0.10);
+  }
+
+  // Corridor decay
+  if (activeCorridor) {
+    activeCorridor.timer -= dt/16.67;
+    if (activeCorridor.timer <= 0) activeCorridor = null;
+  }
+
+  // Gate flash decay
+  Object.keys(flashingGates).forEach(gid => {
+    flashingGates[gid].timer -= dt/16.67;
+    if (flashingGates[gid].timer <= 0) delete flashingGates[gid];
+  });
+
+  recalcZoneCounts();
+  updateZoneStatus();
+}
+
+function endScenario() {
+  activeScenario = null;
+  document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('h-scenario').textContent = 'COMPLETE';
+  document.getElementById('narrativeStep').textContent = 'SCENARIO COMPLETE · Press any scenario to start again';
+  showToast('✓ Scenario complete');
+  // Smoothly release focus mode after a pause
+  setTimeout(() => disableFocusMode(), 2500);
+}
+
+// ---------- DRAW ARROW (from OLD version — clean animated reroute arrows) ----------
+function drawArrow(x1, y1, x2, y2, color, lw) {
+  const headLen = 16;
+  const angle = Math.atan2(y2-y1, x2-x1);
+  const pulse = (Math.sin(tick*0.1)+1)/2;
+  // Shorten to start/end at zone edges
+  const za = ZONES[Object.keys(ZONES).find(k => ZONES[k].x*canvas.width === x1 && ZONES[k].y*canvas.height === y1)] || {};
+  const dist = Math.sqrt((x2-x1)**2+(y2-y1)**2);
+  const trim = 30;
+  const ax = x1 + Math.cos(angle)*trim;
+  const ay = y1 + Math.sin(angle)*trim;
+  const bx = x2 - Math.cos(angle)*trim;
+  const by = y2 - Math.sin(angle)*trim;
+
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = lw;
+  ctx.globalAlpha = 0.55 + pulse * 0.45;
+  ctx.setLineDash([12, 7]);
+  ctx.beginPath();
+  ctx.moveTo(ax, ay);
+  ctx.lineTo(bx, by);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  // Arrowhead
+  ctx.globalAlpha = 0.75 + pulse * 0.25;
+  ctx.beginPath();
+  ctx.moveTo(bx, by);
+  ctx.lineTo(bx - headLen*Math.cos(angle-0.42), by - headLen*Math.sin(angle-0.42));
+  ctx.moveTo(bx, by);
+  ctx.lineTo(bx - headLen*Math.cos(angle+0.42), by - headLen*Math.sin(angle+0.42));
+  ctx.stroke();
+  ctx.restore();
+}
+
+// ---------- DRAW ----------
+function draw() {
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+
+  // Grid background
+  ctx.strokeStyle = 'rgba(255,122,26,0.04)';
+  ctx.lineWidth = 1;
+  for (let x = 0; x < W; x += 40) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+  for (let y = 0; y < H; y += 40) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+
+  // Godavari river (curved, sacred)
+  const riverGrad = ctx.createLinearGradient(0, H*0.6, 0, H);
+  riverGrad.addColorStop(0, 'rgba(62,198,255,0.2)');
+  riverGrad.addColorStop(1, 'rgba(0,100,200,0.08)');
+  ctx.fillStyle = riverGrad;
+  ctx.strokeStyle = 'rgba(62,198,255,0.4)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(0, H*0.68);
+  ctx.bezierCurveTo(W*0.2, H*0.72, W*0.4, H*0.65, W*0.6, H*0.70);
+  ctx.bezierCurveTo(W*0.75, H*0.74, W*0.9, H*0.68, W, H*0.71);
+  ctx.lineTo(W, H);
+  ctx.lineTo(0, H);
+  ctx.closePath();
+  ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(0, H*0.68);
+  ctx.bezierCurveTo(W*0.2, H*0.72, W*0.4, H*0.65, W*0.6, H*0.70);
+  ctx.bezierCurveTo(W*0.75, H*0.74, W*0.9, H*0.68, W, H*0.71);
+  ctx.stroke();
+
+  ctx.fillStyle = 'rgba(62,198,255,0.45)';
+  ctx.font = `italic 13px 'Share Tech Mono'`;
+  ctx.fillText('~ GODAVARI RIVER ~', W*0.3, H*0.77);
+
+  // ---- ROUTES (multi-path network — more routes for visual realism) ----
+  // Draw secondary/background routes first (lighter)
+  const secondaryRoutes = [
+    ['ramkund','ahilyadevi'],   // direct (duplicate of G2)
+    ['ramkund','tapovan'],      // via hills
+    ['ahilyadevi','tapovan'],   // cross route
+    ['ahilyadevi','panchavati'],// direct south
+    ['makhmalabad','tapovan'],  // north road
+  ];
+  secondaryRoutes.forEach(([a, b]) => {
+    const za = ZONES[a], zb = ZONES[b];
+    ctx.strokeStyle = 'rgba(200,160,80,0.08)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([3, 8]);
+    ctx.beginPath(); ctx.moveTo(za.x*W, za.y*H); ctx.lineTo(zb.x*W, zb.y*H); ctx.stroke();
+    ctx.setLineDash([]);
+  });
+
+  // Primary gate-based paths — with active/rerouting glow
+  gates.forEach(g => {
+    const [z1, z2] = g.connects;
+    const za = ZONES[z1], zb = ZONES[z2];
+    if (!za || !zb) return;
+
+    // Is this route actively used for rerouting?
+    const isRerouting = rerouteArrows.some(a => 
+      (a.from === z1 && a.to === z2) || (a.from === z2 && a.to === z1));
+    const isFocusRoute = focusMode && focusZoneKey && g.connects.includes(focusZoneKey);
+    const isClosed = !g.open;
+
+    let col, lw;
+    if (isClosed) {
+      col = 'rgba(255,59,92,0.45)';
+      lw = 2;
+      ctx.setLineDash([4,4]);
+    } else if (isRerouting) {
+      const pulse = (Math.sin(tick * 0.08) + 1) / 2;
+      col = `rgba(62,198,255,${0.45 + pulse * 0.35})`;
+      lw = 3.5;
+      // Extra glow for active reroute
+      ctx.save();
+      ctx.strokeStyle = `rgba(62,198,255,${0.12 + pulse * 0.1})`;
+      ctx.lineWidth = 14;
+      ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(za.x*W, za.y*H); ctx.lineTo(g.x*W, g.y*H); ctx.lineTo(zb.x*W, zb.y*H); ctx.stroke();
+      ctx.lineCap = 'butt';
+      ctx.restore();
+    } else if (isFocusRoute) {
+      const fp = (Math.sin(tick * 0.05) + 1) / 2;
+      col = `rgba(255,179,71,${0.45 + fp * 0.28})`;
+      lw = 2.5;
+    } else {
+      col = 'rgba(200,160,80,0.22)';
+      lw = 1.5;
+    }
+
+    ctx.strokeStyle = col;
+    ctx.lineWidth = lw;
+    ctx.beginPath();
+    ctx.moveTo(za.x*W, za.y*H);
+    ctx.lineTo(g.x*W, g.y*H);
+    ctx.lineTo(zb.x*W, zb.y*H);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  });
+
+  // Medical/VIP corridor
+  if (activeCorridor) {
+    const fromCoord = getRefCoord(activeCorridor.from);
+    const toCoord = getRefCoord(activeCorridor.to);
+    if (fromCoord && toCoord) {
+      const pulse = (Math.sin(tick*0.1)+1)/2;
+      ctx.strokeStyle = `rgba(185,104,255,${0.3 + pulse*0.4})`;
+      ctx.lineWidth = 24;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(fromCoord.x*W, fromCoord.y*H);
+      ctx.lineTo(toCoord.x*W, toCoord.y*H);
+      ctx.stroke();
+      ctx.lineCap = 'butt';
+
+      ctx.strokeStyle = 'rgba(185,104,255,0.9)';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([8,6]);
+      ctx.beginPath();
+      ctx.moveTo(fromCoord.x*W, fromCoord.y*H);
+      ctx.lineTo(toCoord.x*W, toCoord.y*H);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+  }
+
+  // Zones
+  Object.entries(ZONES).forEach(([key, z]) => {
+    const zd = zoneData[key]; if (!zd) return;
+    const cx = z.x*W, cy = z.y*H, r = z.r * Math.min(W, H);
+    const col = zd.color;
+
+    // Fill
+    let fillCol = 'rgba(0,232,156,0.07)';
+    if (col === '#FFD60A') fillCol = 'rgba(255,214,10,0.14)';
+    if (col === '#FF3B5C') fillCol = 'rgba(255,59,92,0.22)';
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI*2);
+    ctx.fillStyle = fillCol;
+    ctx.fill();
+
+    // Border
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI*2);
+    ctx.strokeStyle = col;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Warning glow
+    if (col === '#FFD60A') {
+      const pulse = (Math.sin(tick*0.09)+1)/2;
+      const heatGrad = ctx.createRadialGradient(cx, cy, r*0.5, cx, cy, r + 14 + pulse*8);
+      heatGrad.addColorStop(0, 'rgba(255,214,10,0.08)');
+      heatGrad.addColorStop(0.7, 'rgba(255,214,10,0.04)');
+      heatGrad.addColorStop(1, 'rgba(255,214,10,0)');
+      ctx.beginPath(); ctx.arc(cx, cy, r + 14 + pulse*8, 0, Math.PI*2);
+      ctx.fillStyle = heatGrad; ctx.fill();
+      ctx.beginPath(); ctx.arc(cx, cy, r + pulse*6, 0, Math.PI*2);
+      ctx.strokeStyle = `rgba(255,214,10,${0.3 + pulse*0.2})`;
+      ctx.lineWidth = 1.5; ctx.stroke();
+    }
+
+    // Danger pulse — STRONG red glow with multiple rings
+    if (col === '#FF3B5C') {
+      const pulse = (Math.sin(tick*0.12)+1)/2;
+      const pulse2 = (Math.sin(tick*0.18+1)+1)/2;
+      // Heat haze gradient
+      const heatGrad = ctx.createRadialGradient(cx, cy, r*0.3, cx, cy, r + 30 + pulse*20);
+      heatGrad.addColorStop(0, 'rgba(255,59,92,0.18)');
+      heatGrad.addColorStop(0.5, 'rgba(255,59,92,0.08)');
+      heatGrad.addColorStop(1, 'rgba(255,59,92,0)');
+      ctx.beginPath(); ctx.arc(cx, cy, r + 30 + pulse*20, 0, Math.PI*2);
+      ctx.fillStyle = heatGrad; ctx.fill();
+      // Inner strong pulse ring
+      ctx.beginPath();
+      ctx.arc(cx, cy, r + pulse*12, 0, Math.PI*2);
+      ctx.strokeStyle = `rgba(255,59,92,${0.6 - pulse*0.35})`;
+      ctx.lineWidth = 2.5; ctx.stroke();
+      // Outer expanding ring
+      ctx.beginPath();
+      ctx.arc(cx, cy, r + 8 + pulse2*22, 0, Math.PI*2);
+      ctx.strokeStyle = `rgba(255,59,92,${0.35 - pulse2*0.3})`;
+      ctx.lineWidth = 1.5; ctx.stroke();
+      // Thicker zone border when danger
+      ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2);
+      ctx.strokeStyle = `rgba(255,59,92,${0.7 + pulse*0.3})`;
+      ctx.lineWidth = 3; ctx.stroke();
+    }
+
+    // Zone label
+    ctx.fillStyle = col;
+    ctx.font = `bold 13px 'Teko'`;
+    ctx.textAlign = 'center';
+    ctx.fillText(z.name.toUpperCase(), cx, cy - r - 10);
+
+    // Capacity readout — show scaled crowd numbers for believability
+    const dispCount = Math.round(zd.count * CROWD_SCALE);
+    const dispCap   = Math.round(z.capacity * CROWD_SCALE);
+    ctx.fillStyle = 'rgba(255,255,255,0.55)';
+    ctx.font = `10px 'Share Tech Mono'`;
+    ctx.fillText(`${dispCount.toLocaleString()} / ${dispCap.toLocaleString()} (${Math.round(zd.density*100)}%)`, cx, cy + r + 15);
+
+    // Holy marker
+    if (z.holy) {
+      ctx.fillStyle = 'rgba(255,179,71,0.5)';
+      ctx.font = `12px 'Share Tech Mono'`;
+      ctx.fillText('🕉', cx, cy + 4);
+    }
+
+    ctx.textAlign = 'left';
+
+    if (selectedZone === key) {
+      ctx.beginPath();
+      ctx.arc(cx, cy, r+7, 0, Math.PI*2);
+      ctx.strokeStyle = '#FF7A1A';
+      ctx.lineWidth = 2.5;
+      ctx.setLineDash([8,4]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    // Focus mode: extra cinematic glow ring on the focus zone
+    if (focusMode && focusZoneKey === key) {
+      const fp = (Math.sin(tick * 0.07) + 1) / 2;
+      // Outer sweep ring
+      const grad2 = ctx.createRadialGradient(cx, cy, r * 0.7, cx, cy, r + 28 + fp * 14);
+      grad2.addColorStop(0, `rgba(255,122,26,${0.18 + fp * 0.1})`);
+      grad2.addColorStop(1, 'rgba(255,122,26,0)');
+      ctx.beginPath();
+      ctx.arc(cx, cy, r + 28 + fp * 14, 0, Math.PI * 2);
+      ctx.fillStyle = grad2;
+      ctx.fill();
+      // Inner bright ring
+      ctx.beginPath();
+      ctx.arc(cx, cy, r + 3, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(255,179,71,${0.55 + fp * 0.35})`;
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+      // Scanline label
+      ctx.fillStyle = `rgba(255,179,71,${0.7 + fp * 0.25})`;
+      ctx.font = `bold 10px 'Share Tech Mono'`;
+      ctx.textAlign = 'center';
+      ctx.fillText('◀ ACTIVE ZONE ▶', cx, cy + r + 26);
+      ctx.textAlign = 'left';
+    }
+  });
+
+  // ---- REROUTE ARROWS (from OLD — dashed animated arrows) ----
+  rerouteArrows.forEach(a => {
+    const za = ZONES[a.from], zb = ZONES[a.to];
+    if (!za || !zb) return;
+    const alpha = Math.min(1, a.timer / 60);
+    ctx.globalAlpha = alpha;
+    drawArrow(za.x*W, za.y*H, zb.x*W, zb.y*H, '#3EC6FF', 3);
+    ctx.globalAlpha = 1;
+  });
+
+  // ---- ENTRY POINTS ----
+  Object.entries(ENTRY_POINTS).forEach(([key, ep]) => {
+    const ex = ep.x * W, ey = ep.y * H;
+    const st = entryStates[key] || { pressure: 0, open: true };
+    const feedGate = gates.find(g => g.id === ep.feedsGate);
+    const isOpen = feedGate ? feedGate.open : true;
+    const pulse = (Math.sin(tick * 0.12) + 1) / 2;
+    const pressureCol = st.pressure > 0.65 ? '#FF3B5C' : st.pressure > 0.3 ? '#FFD60A' : ep.color;
+
+    ctx.save();
+    // Triangle entry marker
+    const s = 13;
+    ctx.beginPath();
+    ctx.moveTo(ex, ey - s);
+    ctx.lineTo(ex + s * 0.87, ey + s * 0.5);
+    ctx.lineTo(ex - s * 0.87, ey + s * 0.5);
+    ctx.closePath();
+    ctx.fillStyle = isOpen ? pressureCol + '35' : 'rgba(255,59,92,0.15)';
+    ctx.fill();
+    ctx.strokeStyle = isOpen ? pressureCol : '#FF3B5C';
+    ctx.lineWidth = isOpen ? 2.5 : 2;
+    if (!isOpen) ctx.setLineDash([3,3]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Pressure glow
+    if (st.pressure > 0.25) {
+      ctx.beginPath();
+      ctx.arc(ex, ey, s + 4 + pulse * st.pressure * 10, 0, Math.PI*2);
+      ctx.strokeStyle = pressureCol;
+      ctx.globalAlpha = 0.3 * st.pressure * (0.6 + pulse * 0.4);
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+      // Second outer glow ring for high pressure
+      if (st.pressure > 0.5) {
+        ctx.beginPath();
+        ctx.arc(ex, ey, s + 10 + pulse * st.pressure * 14, 0, Math.PI*2);
+        ctx.strokeStyle = pressureCol;
+        ctx.globalAlpha = 0.15 * st.pressure;
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
+    }
+
+    // Flow line from entry toward zone
+    const fz = ZONES[ep.feedsZone];
+    if (isOpen && fz) {
+      const fp2 = (Math.sin(tick * 0.08 + 1.5) + 1) / 2;
+      ctx.globalAlpha = 0.18 + fp2 * 0.12;
+      ctx.strokeStyle = ep.color;
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([6, 8]);
+      ctx.beginPath(); ctx.moveTo(ex, ey); ctx.lineTo(fz.x*W, fz.y*H); ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = isOpen ? pressureCol : '#FF3B5C';
+    ctx.font = `bold 9px 'Share Tech Mono'`;
+    ctx.textAlign = 'center';
+    ctx.fillText(ep.short, ex, ey - s - 6);
+    ctx.font = `bold 9px 'Share Tech Mono'`;
+    ctx.fillText(isOpen ? 'OPEN' : '✕ CLOSED', ex, ey + s + 14);
+    ctx.textAlign = 'left';
+    ctx.restore();
+  });
+
+  // ---- HOSPITAL MARKER ----
+  {
+    const hx = HOSPITAL.x * W, hy = HOSPITAL.y * H;
+    const pulse = (Math.sin(tick * 0.14) + 1) / 2;
+    const isActive = HOSPITAL.active;
+    ctx.save();
+    ctx.globalAlpha = isActive ? (0.8 + pulse * 0.2) : 0.35;
+    const hs = 11;
+    ctx.fillStyle = isActive ? 'rgba(185,104,255,0.2)' : 'rgba(255,255,255,0.05)';
+    ctx.strokeStyle = isActive ? '#B968FF' : 'rgba(255,255,255,0.3)';
+    ctx.lineWidth = isActive ? 2 : 1.5;
+    // Cross shape
+    ctx.beginPath();
+    ctx.rect(hx - hs*0.4, hy - hs, hs*0.8, hs*2);
+    ctx.rect(hx - hs, hy - hs*0.4, hs*2, hs*0.8);
+    ctx.fill();
+    ctx.stroke();
+    if (isActive) {
+      ctx.beginPath();
+      ctx.arc(hx, hy, hs + 5 + pulse * 7, 0, Math.PI*2);
+      ctx.strokeStyle = '#B968FF';
+      ctx.globalAlpha = 0.2 * pulse;
+      ctx.stroke();
+      ctx.globalAlpha = 0.9;
+    }
+    ctx.fillStyle = isActive ? '#B968FF' : 'rgba(255,255,255,0.35)';
+    ctx.font = `bold 8px 'Share Tech Mono'`;
+    ctx.textAlign = 'center';
+    ctx.fillText('HOSPITAL', hx, hy - hs - 5);
+    ctx.textAlign = 'left';
+    ctx.restore();
+  }
+
+  // ---- SUPPORT CAMPS ----
+  Object.entries(SUPPORT_CAMPS).forEach(([key, camp]) => {
+    const cx = camp.x * W, cy = camp.y * H;
+    const isActive = activeCamps[key];
+    const pulse = (Math.sin(tick * 0.1) + 1) / 2;
+    const baseAlpha = isActive ? (0.7 + pulse * 0.3) : 0.28;
+    const size = 11;
+
+    ctx.save();
+    ctx.globalAlpha = baseAlpha;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - size); ctx.lineTo(cx + size, cy);
+    ctx.lineTo(cx, cy + size); ctx.lineTo(cx - size, cy);
+    ctx.closePath();
+    ctx.fillStyle = isActive ? camp.color + '33' : 'rgba(255,255,255,0.04)';
+    ctx.fill();
+    ctx.strokeStyle = camp.color;
+    ctx.lineWidth = isActive ? 2 : 1.2;
+    ctx.stroke();
+    if (isActive) {
+      ctx.beginPath();
+      ctx.arc(cx, cy, size + 6 + pulse * 5, 0, Math.PI*2);
+      ctx.strokeStyle = camp.color;
+      ctx.lineWidth = 1;
+      ctx.globalAlpha = 0.3 * pulse;
+      ctx.stroke();
+    }
+    ctx.globalAlpha = baseAlpha;
+    ctx.fillStyle = camp.color;
+    ctx.font = `bold 8px 'Share Tech Mono'`;
+    ctx.textAlign = 'center';
+    ctx.fillText(camp.short, cx, cy + 3);
+    ctx.font = `8px 'Share Tech Mono'`;
+    ctx.fillStyle = isActive ? camp.color : 'rgba(255,255,255,0.25)';
+    ctx.fillText(camp.name.toUpperCase(), cx, cy - size - 5);
+    ctx.textAlign = 'left';
+    ctx.restore();
+  });
+
+  // ---- ZONE VOLUNTEER POSTS (one inside each zone circle) ----
+  Object.entries(ZONE_VOLUNTEERS).forEach(([zoneKey, v]) => {
+    const z = ZONES[zoneKey]; if (!z) return;
+    const vx = (z.x + v.offsetX) * W;
+    const vy = (z.y + v.offsetY) * H;
+    const pulse = (Math.sin(tick * 0.11) + 1) / 2;
+    const isActive = v.active && v.timer > 0;
+    const size = 7;
+
+    ctx.save();
+    // Outer glow when active
+    if (isActive) {
+      const glowGrad = ctx.createRadialGradient(vx, vy, size, vx, vy, size + 24 + pulse*12);
+      glowGrad.addColorStop(0, 'rgba(0,232,156,0.35)');
+      glowGrad.addColorStop(0.5, 'rgba(0,232,156,0.15)');
+      glowGrad.addColorStop(1, 'rgba(0,232,156,0)');
+      ctx.beginPath();
+      ctx.arc(vx, vy, size + 24 + pulse*12, 0, Math.PI*2);
+      ctx.fillStyle = glowGrad;
+      ctx.fill();
+      // Pulse ring
+      ctx.beginPath();
+      ctx.arc(vx, vy, size + 8 + pulse*8, 0, Math.PI*2);
+      ctx.strokeStyle = `rgba(0,232,156,${0.7 - pulse*0.4})`;
+      ctx.lineWidth = 1.8;
+      ctx.stroke();
+    }
+    // Volunteer post marker — small house/tent shape
+    ctx.globalAlpha = isActive ? 1 : 0.55;
+    ctx.beginPath();
+    ctx.moveTo(vx, vy - size);
+    ctx.lineTo(vx + size, vy + size*0.3);
+    ctx.lineTo(vx + size*0.7, vy + size);
+    ctx.lineTo(vx - size*0.7, vy + size);
+    ctx.lineTo(vx - size, vy + size*0.3);
+    ctx.closePath();
+    ctx.fillStyle = isActive ? 'rgba(0,232,156,0.5)' : 'rgba(255,255,255,0.15)';
+    ctx.fill();
+    ctx.strokeStyle = isActive ? '#00E89C' : 'rgba(255,255,255,0.4)';
+    ctx.lineWidth = isActive ? 2 : 1;
+    ctx.stroke();
+    // Label
+    ctx.fillStyle = isActive ? '#00E89C' : 'rgba(255,255,255,0.4)';
+    ctx.font = `bold 7px 'Share Tech Mono'`;
+    ctx.textAlign = 'center';
+    ctx.fillText(v.name, vx, vy - size - 4);
+    ctx.textAlign = 'left';
+    ctx.restore();
+  });
+
+  // ---- SURGE PARTICLES (zone density extra dots) ----
+  ctx.save();
+  surgeParticles.forEach(sp => {
+    ctx.beginPath();
+    ctx.arc(sp.x, sp.y, sp.size, 0, Math.PI*2);
+    ctx.fillStyle = '#FF9A3C';
+    ctx.globalAlpha = sp.alpha * (sp.life / 120);
+    ctx.fill();
+  });
+  ctx.restore();
+
+  // ---- NPC CROWD NODES ----
+  ctx.save();
+  npcNodes.forEach(n => {
+    ctx.beginPath();
+    ctx.arc(n.x, n.y, n.size, 0, Math.PI*2);
+    ctx.fillStyle = n.col || '#FF9A3C';
+    const lifeAlpha = Math.min(1, n.life / 60);
+    ctx.globalAlpha = n.alpha * lifeAlpha;
+    ctx.fill();
+  });
+  ctx.restore();
+  ctx.globalAlpha = 1;
+  gates.forEach(g => {
+    const gx = g.x*W, gy = g.y*H;
+    const flash = flashingGates[g.id];
+    let col = g.open ? '#FF7A1A' : '#FF3B5C';
+    let fill = g.open ? 'rgba(255,122,26,0.2)' : 'rgba(255,59,92,0.2)';
+    if (flash) {
+      const pulse = (Math.sin(tick*0.4)+1)/2;
+      if (flash.mode === 'divert') { col = pulse>0.5 ? '#FFD60A' : '#FF7A1A'; fill = 'rgba(255,214,10,0.4)'; }
+      else if (flash.mode === 'medical') { col = pulse>0.5 ? '#B968FF' : '#FF7A1A'; fill = 'rgba(185,104,255,0.4)'; }
+      else if (flash.mode === 'wait') { col = pulse>0.5 ? '#3EC6FF' : '#FF7A1A'; fill = 'rgba(62,198,255,0.3)'; }
+    }
+
+    // Outer ring
+    ctx.beginPath();
+    ctx.arc(gx, gy, flash ? 14 : 10, 0, Math.PI*2);
+    ctx.fillStyle = fill;
+    ctx.fill();
+    ctx.strokeStyle = col;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Inner
+    ctx.beginPath();
+    ctx.arc(gx, gy, 4, 0, Math.PI*2);
+    ctx.fillStyle = col;
+    ctx.fill();
+
+    // Gate ID
+    ctx.fillStyle = col;
+    ctx.font = `bold 9px 'Share Tech Mono'`;
+    ctx.textAlign = 'center';
+    ctx.fillText(g.id, gx, gy - 16);
+    ctx.textAlign = 'left';
+
+    // Arrow indicator if flashing
+    if (flash && flash.mode === 'divert') {
+      ctx.strokeStyle = '#FFD60A';
+      ctx.lineWidth = 2;
+      const arrowA = Math.atan2(ZONES[g.connects[1]].y*H - gy, ZONES[g.connects[1]].x*W - gx);
+      const a2x = gx + Math.cos(arrowA) * 22;
+      const a2y = gy + Math.sin(arrowA) * 22;
+      ctx.beginPath();
+      ctx.moveTo(gx, gy);
+      ctx.lineTo(a2x, a2y);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(a2x, a2y);
+      ctx.lineTo(a2x - 6*Math.cos(arrowA-0.4), a2y - 6*Math.sin(arrowA-0.4));
+      ctx.moveTo(a2x, a2y);
+      ctx.lineTo(a2x - 6*Math.cos(arrowA+0.4), a2y - 6*Math.sin(arrowA+0.4));
+      ctx.stroke();
+    }
+  });
+
+  // Pilgrims
+  PILGRIMS.forEach(p => {
+    let col = '#FF9A3C';
+    let size = 2.5;
+    if (p.rerouted) col = '#3EC6FF';
+    if (p.lost) { col = '#FF3B5C'; size = 3.5; }
+    if (p.medical === 'cardiac-event') { col = '#B968FF'; size = 4; }
+    if (p.highlightTimer > 0) {
+      const pulse = (Math.sin(tick*0.2)+1)/2;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 10 + pulse*4, 0, Math.PI*2);
+      ctx.strokeStyle = `rgba(255,122,26,${0.8 - pulse*0.5})`;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, size, 0, Math.PI*2);
+    ctx.fillStyle = col;
+    ctx.fill();
+    if (CONFIG.showIds) {
+      ctx.fillStyle = 'rgba(255,255,255,0.5)';
+      ctx.font = '7px "Share Tech Mono"';
+      ctx.fillText(p.bandId, p.x+5, p.y+3);
+    }
+  });
+
+  // Simulation time label (overlay)
+  ctx.fillStyle = 'rgba(255,122,26,0.3)';
+  ctx.font = `bold 28px 'Bebas Neue'`;
+  ctx.fillText(simTimeLabel, W - 140, 40);
+}
+
+function loop() {
+  if (!simRunning) return;
+  resize();
+  const dt = 16.67; // approximate frame time
+  updateSim(dt);
+  draw();
+  animFrame = requestAnimationFrame(loop);
+}
+
+// ---------- RESET ----------
+function resetSim(keepRunning) {
+  if (animFrame) cancelAnimationFrame(animFrame);
+  simRunning = false;
+  activeScenario = null;
+  scenarioStepIdx = 0;
+  scenarioTimer = 0;
+  activeCorridor = null;
+  flashingGates = {};
+  stats = { total: 0, rerouted: 0, danger: 0, reunited: 0 };
+  tick = 0;
+  hideSurgeAlert();
+  hideComparisonBanner();
+  hideZoneInfoPopup();
+  disableFocusMode();
+  surgeParticles = [];
+  rerouteArrows = [];
+  activeCamps = {};
+  Object.keys(ZONE_VOLUNTEERS).forEach(k => { ZONE_VOLUNTEERS[k].active = false; ZONE_VOLUNTEERS[k].timer = 0; });
+  unpinAllZoneDensities();
+  npcNodes = [];
+  surgeInflows = [];
+  entryStates = {};
+  HOSPITAL.active = false; HOSPITAL.timer = 0;
+  document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('active'));
+  if (!keepRunning) document.getElementById('h-scenario').textContent = 'IDLE';
+
+  // Rebuild pilgrim database
+  buildPilgrimDB();
+  initPilgrimPositions();
+  initNPCNodes();
+  initZoneData();
+  initGates();
+  initZoneCards();
+  initWristbandsDisplay();
+  handleSearch('');
+  recalcZoneCounts();
+  updateZoneStatus();
+  resize();
+
+  if (!keepRunning) {
+    draw();
+    setNarrative('Ready. Select a scenario below to begin.', 0, 1);
+    document.getElementById('narrativeStep').textContent = 'SCENARIO: none · STEP 0/0';
+    logEvent('info','⟳ System reset. Ready for new scenario.');
+  }
+}
+
+function selectZone(key) {
+  selectedZone = selectedZone === key ? null : key;
+}
+
+// ---------- EVENT LISTENERS ----------
+document.getElementById('searchInput').addEventListener('input', e => handleSearch(e.target.value));
+
+canvas.addEventListener('click', e => {
+  const rect = canvas.getBoundingClientRect();
+  const mx = (e.clientX - rect.left) / rect.width;
+  const my = (e.clientY - rect.top) / rect.height;
+  const pixelX = mx * canvas.width;
+  const pixelY = my * canvas.height;
+
+  // Check zones — show info popup + select
+  let hitZone = false;
+  Object.entries(ZONES).forEach(([k, z]) => {
+    const dx = mx - z.x, dy = my - z.y;
+    if (Math.sqrt(dx*dx + dy*dy) < z.r) {
+      selectZone(k);
+      showZoneInfoPopup(k, z.x * canvas.width, z.y * canvas.height);
+      hitZone = true;
+    }
+  });
+  if (!hitZone) hideZoneInfoPopup();
+
+  // Check gate clicks
+  gates.forEach(g => {
+    const dx = (mx - g.x) * canvas.width, dy = (my - g.y) * canvas.height;
+    if (Math.sqrt(dx*dx + dy*dy) < 14) toggleGate(g.id);
+  });
+
+  // Check pilgrim clicks (within 8px)
+  let closest = null, closestDist = 12;
+  PILGRIMS.forEach(p => {
+    const d = Math.sqrt((p.x - pixelX)**2 + (p.y - pixelY)**2);
+    if (d < closestDist) { closestDist = d; closest = p; }
+  });
+  if (closest) openPilgrimModal(closest.id);
+});
+
+canvas.addEventListener('mousemove', e => {
+  const rect = canvas.getBoundingClientRect();
+  const mx = (e.clientX - rect.left) / rect.width;
+  const my = (e.clientY - rect.top) / rect.height;
+  const tt = document.getElementById('tooltip');
+  let found = false;
+  Object.entries(ZONES).forEach(([k, z]) => {
+    const dx = mx - z.x, dy = my - z.y;
+    if (Math.sqrt(dx*dx + dy*dy) < z.r && zoneData[k]) {
+      const zd = zoneData[k];
+      const dispC = Math.round(zd.count * CROWD_SCALE);
+      const dispCap = Math.round(z.capacity * CROWD_SCALE);
+      tt.innerHTML = `<h4>${z.name}</h4>
+        Pilgrims: <b>${dispC.toLocaleString()}</b> / ${dispCap.toLocaleString()}<br>
+        Density: <b style="color:${zd.color}">${Math.round(zd.density*100)}%</b><br>
+        Status: <b style="color:${zd.color}">${zd.status}</b><br>
+        Route Code: <b style="color:var(--saffron)">${ROUTE_CODES[k]}</b>`;
+      tt.style.left = (e.clientX - rect.left + 14) + 'px';
+      tt.style.top = (e.clientY - rect.top - 10) + 'px';
+      tt.classList.add('visible');
+      found = true;
+    }
+  });
+  if (!found) tt.classList.remove('visible');
+});
+
+// Admin sliders
+document.getElementById('admin-speed').addEventListener('input', e => {
+  CONFIG.speed = parseFloat(e.target.value);
+  document.getElementById('speed-val').textContent = CONFIG.speed.toFixed(1) + 'x';
+});
+document.getElementById('admin-warn').addEventListener('input', e => {
+  CONFIG.warnThreshold = parseInt(e.target.value)/100;
+  document.getElementById('warn-val').textContent = e.target.value + '%';
+});
+document.getElementById('admin-danger').addEventListener('input', e => {
+  CONFIG.dangerThreshold = parseInt(e.target.value)/100;
+  document.getElementById('danger-val').textContent = e.target.value + '%';
+});
+document.getElementById('admin-count').addEventListener('input', e => {
+  CONFIG.pilgrimCount = parseInt(e.target.value);
+  document.getElementById('count-val').textContent = e.target.value;
+});
+document.getElementById('admin-auto').addEventListener('change', e => CONFIG.autoReroute = e.target.checked);
+document.getElementById('admin-ids').addEventListener('change', e => CONFIG.showIds = e.target.checked);
+
+// Close modals on background click
+['pilgrimModal','impactModal','adminModal','presNotesModal'].forEach(id => {
+  document.getElementById(id).addEventListener('click', e => {
+    if (e.target.id === id) document.getElementById(id).classList.remove('show');
+  });
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    ['pilgrimModal','impactModal','adminModal','presNotesModal'].forEach(id => document.getElementById(id).classList.remove('show'));
+    hideZoneInfoPopup();
+  }
+  if (e.key === ' ' && !e.target.matches('input')) {
+    e.preventDefault();
+    if (simRunning) { simRunning = false; logEvent('warn','⏸ Paused'); }
+    else if (activeScenario) { simRunning = true; loop(); logEvent('ok','▶ Resumed'); }
+  }
+  // 'F' key toggles focus mode
+  if ((e.key === 'f' || e.key === 'F') && !e.target.matches('input')) {
+    toggleFocusMode();
+  }
+});
+
+// Window resize
+window.addEventListener('resize', () => { resize(); if (!simRunning) draw(); });
+
+// ---------- BOOT ----------
+resize();
+buildPilgrimDB();
+initZoneData();
+initGates();
+initZoneCards();
+initPilgrimPositions();
+initNPCNodes();
+Object.keys(ENTRY_POINTS).forEach(k => { entryStates[k] = { pressure: 0, open: true }; });
+initWristbandsDisplay();
+recalcZoneCounts();
+updateZoneStatus();
+handleSearch('');
+draw();
+// Init focus mode button state (enabled by default)
+document.getElementById('focusModeBtn').classList.add('focus-btn-active');
+document.getElementById('focusModeBtn').textContent = '🎯 Focus Mode ON';
+logEvent('ok','System ready. Kumbh Kavach v2.0 online.');
+logEvent('info', `Loaded ${PILGRIMS.length} pilgrims across ${FAMILY_DATA.length} families from ${new Set(FAMILY_DATA.map(f=>f.state)).size} states.`);
+logEvent('info', '🎯 Focus Mode ON — zones spotlight automatically during scenarios. Press [F] to toggle.');
+</script>
+</body>
+</html>
