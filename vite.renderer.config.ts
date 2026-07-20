@@ -20,6 +20,6 @@ export default defineConfig({
     workbox: { navigateFallback: '/index.html', globPatterns: ['**/*.{js,css,html,svg,woff2}'] }
   })],
   resolve: { alias: { '@': path.resolve(__dirname, './src') } },
-  test: { environment: 'jsdom', setupFiles: ['./src/test/setup.ts'], css: true },
+  test: { environment: 'jsdom', setupFiles: ['./src/test/setup.ts'], css: true, exclude: ['tests/e2e/**', 'node_modules/**', 'dist/**'] },
   build: { outDir: 'dist' }
 });

@@ -25,18 +25,20 @@ export interface DeriveStatusInput {
   guardianLocation: LocationSample;
   now: number;
   reunionActive?: boolean;
+  reunionEligible?: boolean;
+  reunionConfirmed?: boolean;
   thresholds?: SafetyThresholds;
 }
 
 export function deriveMember(input: DeriveStatusInput): DerivedMember {
-  const { member, guardianLocation, now, reunionActive = false, thresholds = safetyThresholds } = input;
+  const { member, guardianLocation, now, reunionActive = false, reunionEligible = false, reunionConfirmed = false, thresholds = safetyThresholds } = input;
   const distanceMetres = haversineMetres(guardianLocation, member.location);
   const heartbeatAgeMs = Math.max(0, now - member.lastHeartbeatAt);
   let status: SafetyStatus;
 
   if (member.sosActive) status = 'sos';
   else if (!member.locationSharing || heartbeatAgeMs > thresholds.offlineAfterMs) status = 'offline';
-  else if (reunionActive && distanceMetres <= thresholds.reunionMetres) status = 'reunited';
+  else if (reunionActive && reunionEligible && reunionConfirmed && distanceMetres <= thresholds.reunionMetres) status = 'reunited';
   else if (distanceMetres <= thresholds.safeMetres) status = 'safe';
   else if (distanceMetres <= thresholds.warningMetres) status = 'warning';
   else if (!member.crossedBoundaryAt || now - member.crossedBoundaryAt < thresholds.separationGraceMs) status = 'warning';
@@ -45,10 +47,23 @@ export function deriveMember(input: DeriveStatusInput): DerivedMember {
   return { ...member, distanceMetres, heartbeatAgeMs, status };
 }
 
-export function deriveFamily(members: RawMember[], guardianId: string, now: number, reunionMemberId?: string): DerivedMember[] {
+export interface ReunionContext {
+  memberId?: string;
+  eligibleMemberIds?: string[];
+  confirmedMemberIds?: string[];
+}
+
+export function deriveFamily(members: RawMember[], guardianId: string, now: number, reunion: ReunionContext = {}): DerivedMember[] {
   const guardian = members.find((member) => member.id === guardianId);
   if (!guardian) return [];
-  return members.map((member) => deriveMember({ member, guardianLocation: guardian.location, now, reunionActive: reunionMemberId === member.id }));
+  return members.map((member) => deriveMember({
+    member,
+    guardianLocation: guardian.location,
+    now,
+    reunionActive: reunion.memberId === member.id,
+    reunionEligible: reunion.eligibleMemberIds?.includes(member.id),
+    reunionConfirmed: reunion.confirmedMemberIds?.includes(member.id),
+  }));
 }
 
 export function withBoundaryTimestamp(member: RawMember, guardianLocation: LocationSample, now: number, thresholds = safetyThresholds): RawMember {
