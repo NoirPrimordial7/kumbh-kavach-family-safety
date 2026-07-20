@@ -2,6 +2,7 @@ import { mapConfig } from '@/config/mapConfig';
 
 const DIRECTORY = 'kumbh-kavach-maps';
 const ARCHIVE = 'nashik-ramkund-v1.pmtiles';
+export const offlineMapMetadata = { version: 'Ramkund v1', approximateBytes: mapConfig.approximateDownloadBytes, archive: ARCHIVE } as const;
 
 export interface OfflineMapProgress { downloadedBytes: number; totalBytes?: number; percent?: number }
 

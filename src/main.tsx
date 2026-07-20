@@ -5,6 +5,7 @@ import './styles/globals.css';
 import './styles/features.css';
 import './styles/panels.css';
 import './styles/responsive.css';
+import './styles/map.css';
 import '@fontsource-variable/manrope';
 import '@fontsource/dm-serif-display';
 

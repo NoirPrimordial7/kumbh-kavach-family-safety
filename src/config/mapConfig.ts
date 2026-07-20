@@ -5,6 +5,8 @@ export const mapConfig = {
   minZoom: 13,
   defaultZoom: 16.2,
   maxZoom: 19,
+  primaryStyleUrl: import.meta.env.VITE_MAP_PRIMARY_STYLE_URL ?? 'https://tiles.openfreemap.org/styles/liberty',
+  secondaryRasterUrl: import.meta.env.VITE_MAP_SECONDARY_RASTER_URL ?? 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
   onlineArchiveUrl: import.meta.env.VITE_PMTILES_URL ?? 'https://build.protomaps.com/20260518.pmtiles',
   offlineArchiveUrl: import.meta.env.VITE_OFFLINE_PMTILES_URL ?? '/maps/nashik-ramkund-v1.pmtiles',
   attribution: '© OpenStreetMap contributors · Protomaps',

@@ -5,7 +5,7 @@ import type { RawMember } from '@/types/safety';
 const now = 1_000_000;
 const guardian = { lat: 20.005556, lng: 73.794167, accuracy: 5, recordedAt: now };
 const member = (overrides: Partial<RawMember> = {}): RawMember => ({
-  id: 'm1', name: 'Arya', relation: 'Daughter', deviceName: 'Band 02', deviceKind: 'band', reality: 'simulated',
+  id: 'm1', name: 'Arya Dhumal', relation: 'Team Member · TY-CC2-64', deviceName: 'Band 02', deviceKind: 'band', reality: 'simulated',
   battery: 80, connection: 'Simulated', lastHeartbeatAt: now, locationSharing: true, sosActive: false,
   location: guardian, trail: [], ...overrides,
 });
@@ -30,6 +30,19 @@ describe('family safety engine', () => {
   it('derives offline, SOS, and reunion states from raw signals', () => {
     expect(deriveMember({ member: member({ lastHeartbeatAt: now - 25_001 }), guardianLocation: guardian, now }).status).toBe('offline');
     expect(deriveMember({ member: member({ sosActive: true, lastHeartbeatAt: 0 }), guardianLocation: guardian, now }).status).toBe('sos');
-    expect(deriveMember({ member: member(), guardianLocation: guardian, now, reunionActive: true }).status).toBe('reunited');
+    expect(deriveMember({ member: member(), guardianLocation: guardian, now, reunionActive: true }).status).toBe('safe');
+    expect(deriveMember({ member: member(), guardianLocation: guardian, now, reunionActive: true, reunionEligible: true, reunionConfirmed: true }).status).toBe('reunited');
+  });
+
+  it('requires prior danger, guardian confirmation, and 15m proximity for reunion', () => {
+    const nearby = member();
+    expect(deriveMember({ member: nearby, guardianLocation: guardian, now, reunionActive: true, reunionConfirmed: true }).status).toBe('safe');
+    expect(deriveMember({ member: nearby, guardianLocation: guardian, now, reunionActive: true, reunionEligible: true }).status).toBe('safe');
+    const twentyMetres = { ...guardian, lat: guardian.lat + 20 / 111_195 };
+    expect(deriveMember({ member: member({ location: twentyMetres }), guardianLocation: guardian, now, reunionActive: true, reunionEligible: true, reunionConfirmed: true }).status).toBe('safe');
+  });
+
+  it('keeps SOS above a confirmed reunion', () => {
+    expect(deriveMember({ member: member({ sosActive: true }), guardianLocation: guardian, now, reunionActive: true, reunionEligible: true, reunionConfirmed: true }).status).toBe('sos');
   });
 });
