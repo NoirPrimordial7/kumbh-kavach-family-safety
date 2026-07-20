@@ -18,24 +18,24 @@ const baseLocations = {
 };
 
 const seededMembers = (): RawMember[] => [
-  { id: GUARDIAN_ID, name: 'Aarav', relation: 'Guardian', deviceName: 'Guardian Phone', deviceKind: 'phone', reality: 'phone', battery: 92, connection: 'Local Wi-Fi', lastHeartbeatAt: Date.now(), locationSharing: true, sosActive: false, location: baseLocations.guardian, trail: [] },
-  { id: 'member-phone', name: 'Meera', relation: 'Mother', deviceName: "Meera's Phone", deviceKind: 'phone', reality: 'simulated', battery: 78, connection: 'WebSocket', lastHeartbeatAt: Date.now(), locationSharing: true, sosActive: false, location: baseLocations.meera, trail: [] },
-  { id: 'band-01', name: 'Ishaan', relation: 'Son', deviceName: 'Smart Mauli Band 01', deviceKind: 'band', reality: 'simulated', battery: 84, connection: 'Bluetooth', lastHeartbeatAt: Date.now(), locationSharing: true, sosActive: false, location: baseLocations.ishaan, trail: [] },
-  { id: 'band-02', name: 'Arya', relation: 'Daughter', deviceName: 'Smart Mauli Band 02', deviceKind: 'band', reality: 'simulated', battery: 71, connection: 'Bluetooth', lastHeartbeatAt: Date.now(), locationSharing: true, sosActive: false, location: baseLocations.arya, trail: [] },
+  { id: GUARDIAN_ID, name: 'Ashwin Gudur', relation: 'Team Lead · TY-AIA-47', deviceName: "Ashwin's Phone", deviceKind: 'phone', reality: 'phone', battery: 92, connection: 'Local Wi-Fi', lastHeartbeatAt: Date.now(), locationSharing: true, sosActive: false, location: baseLocations.guardian, trail: [] },
+  { id: 'member-phone', name: 'Aditya Gholap', relation: 'Team Member · TY-CC2-61', deviceName: "Aditya's Phone", deviceKind: 'phone', reality: 'simulated', battery: 78, connection: 'WebSocket', lastHeartbeatAt: Date.now(), locationSharing: true, sosActive: false, location: baseLocations.meera, trail: [] },
+  { id: 'band-01', name: 'Himank Maheshwari', relation: 'Team Member · TY-AIA-49', deviceName: 'Smart Mauli Band 01', deviceKind: 'band', reality: 'simulated', battery: 84, connection: 'Bluetooth', lastHeartbeatAt: Date.now(), locationSharing: true, sosActive: false, location: baseLocations.ishaan, trail: [] },
+  { id: 'band-02', name: 'Arya Dhumal', relation: 'Team Member · TY-CC2-64', deviceName: 'Smart Mauli Band 02', deviceKind: 'band', reality: 'simulated', battery: 71, connection: 'Bluetooth', lastHeartbeatAt: Date.now(), locationSharing: true, sosActive: false, location: baseLocations.arya, trail: [] },
 ];
 
-const seededSession: FamilySession = { id: 'FAM-7X4M2Q', joinCode: '274 961', privateKey: 'kv_demo_f84b7c229', name: 'Sharma Family', guardianName: 'Aarav', eventName: mapConfig.eventName, safetyRadius: 50, durationHours: 8, emergencyContact: '+91 98765 43210', startedAt: started, trackingPaused: false };
+const seededSession: FamilySession = { id: 'FAM-7X4M2Q', joinCode: '274 961', privateKey: 'kv_demo_f84b7c229', name: 'Kumbh Kavach Team', guardianName: 'Ashwin', eventName: mapConfig.eventName, safetyRadius: 50, durationHours: 8, emergencyContact: '+91 98765 43210', startedAt: started, trackingPaused: false };
 
 export const demoNarration = [
   'Everyone is close and updating around Ramkund.',
-  'Arya starts moving through the riverfront crowd.',
-  'Arya enters the early-warning band.',
-  'Arya crosses 65m; the eight-second grace period begins.',
+  'Arya Dhumal starts moving through the riverfront crowd.',
+  'Arya Dhumal enters the early-warning band.',
+  'Arya Dhumal crosses 65m; the eight-second grace period begins.',
   'The grace period expires and a separation alert opens.',
-  'Arya raises SOS from the simulated band.',
+  'Arya Dhumal raises SOS from the simulated band.',
   'The guardian starts private Reunion Mode.',
   'Both positions converge on the reunion point.',
-  'Arya enters the 15m reunion radius.',
+  'Arya Dhumal enters the 15m reunion radius.',
 ];
 
 const stepLocations = [

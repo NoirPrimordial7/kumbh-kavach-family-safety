@@ -5,7 +5,7 @@ import type { RawMember } from '@/types/safety';
 const now = 1_000_000;
 const guardian = { lat: 20.005556, lng: 73.794167, accuracy: 5, recordedAt: now };
 const member = (overrides: Partial<RawMember> = {}): RawMember => ({
-  id: 'm1', name: 'Arya', relation: 'Daughter', deviceName: 'Band 02', deviceKind: 'band', reality: 'simulated',
+  id: 'm1', name: 'Arya Dhumal', relation: 'Team Member · TY-CC2-64', deviceName: 'Band 02', deviceKind: 'band', reality: 'simulated',
   battery: 80, connection: 'Simulated', lastHeartbeatAt: now, locationSharing: true, sosActive: false,
   location: guardian, trail: [], ...overrides,
 });
