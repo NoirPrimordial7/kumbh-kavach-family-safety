@@ -26,16 +26,10 @@ export interface RawMember {
   trail: LocationSample[];
 }
 
-export interface SafetyThresholds {
-  safeMetres: number;
-  warningMetres: number;
-  separationGraceMs: number;
-  offlineAfterMs: number;
-  reunionMetres: number;
-}
-
 export interface DerivedMember extends RawMember {
   distanceMetres: number;
+  effectiveDistanceMetres: number;
+  reunionDistanceMetres: number;
   status: SafetyStatus;
   heartbeatAgeMs: number;
 }

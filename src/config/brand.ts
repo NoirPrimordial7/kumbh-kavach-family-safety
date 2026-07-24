@@ -1,3 +1,5 @@
+import { firebaseEnvironment } from './environment';
+
 export const brand = {
   applicationName: 'Kumbh Kavach',
   shortName: 'Kavach',
@@ -15,13 +17,6 @@ export const brand = {
     commandUuid: 'f0a00006-0451-4000-b000-000000000001',
     batteryServiceUuid: 'battery_service'
   },
-  thresholds: {
-    safeRadiusMetres: 50,
-    warningThresholdMultiplier: 1.3,
-    separationGraceSeconds: 8,
-    staleTimeoutSeconds: 25,
-    reunionRadiusMetres: 15
-  },
   colors: {
     canvas: '#F2EDE3', ink: '#121212', primary: '#6C45FF', connected: '#2B65F9',
     safe: '#3EA66B', warning: '#F4C84A', separated: '#F05B35', sos: '#A52FE0', offline: '#8A8A82'
@@ -31,8 +26,8 @@ export const brand = {
 export const productConfig = {
   firebaseCollections: ['families', 'familyMembers', 'devices', 'locations', 'alerts', 'sessions'],
   sessionDurations: [2, 6, 12] as const,
-  reunionCompletionRadiusMetres: 15,
-  firebaseEnabled: Boolean(import.meta.env.VITE_FIREBASE_API_KEY)
+  firebaseEnabled: firebaseEnvironment.configured,
+  firebaseMessage: firebaseEnvironment.message,
 };
 
 export type BrandConfig = typeof brand;
