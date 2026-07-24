@@ -17,9 +17,19 @@ export default defineConfig({
       start_url: '/',
       icons: [{ src: '/icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any maskable' }]
     },
-    workbox: { navigateFallback: '/index.html', globPatterns: ['**/*.{js,css,html,svg,woff2}'] }
+    workbox: {
+      cleanupOutdatedCaches: true,
+      clientsClaim: true,
+      navigateFallback: '/index.html',
+      navigateFallbackDenylist: [/^\/maps\//, /^\/legacy\//],
+      globPatterns: ['**/*.{js,css,html,svg,woff2}'],
+      runtimeCaching: [{
+        urlPattern: ({ url }) => url.pathname.endsWith('.pmtiles'),
+        handler: 'NetworkOnly',
+      }],
+    }
   })],
   resolve: { alias: { '@': path.resolve(__dirname, './src') } },
-  test: { environment: 'jsdom', setupFiles: ['./src/test/setup.ts'], css: true, exclude: ['tests/e2e/**', 'node_modules/**', 'dist/**'] },
+  test: { environment: 'jsdom', setupFiles: ['./src/test/setup.ts'], css: true, exclude: ['tests/e2e/**', 'tests/firebase/**', 'node_modules/**', 'dist/**'] },
   build: { outDir: 'dist' }
 });

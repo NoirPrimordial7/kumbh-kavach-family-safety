@@ -5,12 +5,47 @@ service cloud.firestore {
     function isFamilyMember(familyId) {
       return signedIn() && exists(/databases/$(database)/documents/families/$(familyId)/members/$(request.auth.uid));
     }
+    function isGuardian(familyId) {
+      return signedIn()
+        && get(/databases/$(database)/documents/families/$(familyId)).data.guardianUid == request.auth.uid;
+    }
     match /families/{familyId} {
       allow read: if isFamilyMember(familyId);
       allow create: if signedIn() && request.resource.data.guardianUid == request.auth.uid;
-      allow update, delete: if signedIn() && resource.data.guardianUid == request.auth.uid;
-      match /{collection}/{documentId} {
-        allow read, write: if isFamilyMember(familyId);
+      allow update, delete: if isGuardian(familyId);
+      match /members/{memberId} {
+        allow read: if isFamilyMember(familyId);
+        allow create: if isGuardian(familyId);
+        allow update: if isGuardian(familyId) || (signedIn() && memberId == request.auth.uid);
+        allow delete: if isGuardian(familyId);
+      }
+      match /sessions/{sessionId} {
+        allow read: if isFamilyMember(familyId);
+        allow write: if isGuardian(familyId)
+          && request.resource.data.safetyConfig.safeRadiusMeters is number
+          && request.resource.data.safetyConfig.safeRadiusMeters >= 5
+          && request.resource.data.safetyConfig.safeRadiusMeters <= 1000
+          && request.resource.data.safetyConfig.reunionRadiusMeters is number
+          && request.resource.data.safetyConfig.reunionRadiusMeters >= 3
+          && request.resource.data.safetyConfig.reunionRadiusMeters <= 250;
+      }
+      match /locations/{memberId} {
+        allow read: if isFamilyMember(familyId);
+        allow write: if isFamilyMember(familyId)
+          && (request.auth.uid == memberId || isGuardian(familyId))
+          && request.resource.data.lat is number
+          && request.resource.data.lng is number
+          && request.resource.data.accuracy is number;
+      }
+      match /devices/{deviceId} {
+        allow read: if isFamilyMember(familyId);
+        allow write: if isFamilyMember(familyId)
+          && (request.resource.data.memberUid == request.auth.uid || isGuardian(familyId));
+      }
+      match /alerts/{alertId} {
+        allow read: if isFamilyMember(familyId);
+        allow create: if isFamilyMember(familyId);
+        allow update, delete: if isGuardian(familyId);
       }
     }
   }

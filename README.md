@@ -1,66 +1,88 @@
 # Kumbh Kavach Family Safety
 
-A responsive, installable family safety demonstration for crowded events. The consumer app uses a warm editorial design system, while the original dark Command Center remains isolated and unchanged at `/simulation`.
+Kumbh Kavach is an installable React family-safety demonstration for crowded places. A guardian creates a private family, relatives join by six-digit code, QR code, or invite link, and the app presents phone and Smart Mauli Band locations, separation alerts, SOS, and guided reunion. The original dark crowd Command Center remains isolated at `/simulation`.
 
-## Run locally
+The UI uses React, Vite, TypeScript, Tailwind CSS, Motion, Zustand, MapLibre, and PMTiles. It has no Electron dependency, so the same interface can later be wrapped without a rewrite.
 
-Requires Node.js 20+.
+## Capability labels
+
+- **REAL NOW:** responsive PWA, browser-local family/demo state, opt-in geolocation, same-origin regional map, optional Firebase, and experimental direct Web Bluetooth in supported Chromium browsers.
+- **SIMULATED NOW:** extra phones and bands, deterministic movement, battery/connection changes, separation, SOS, and reunion.
+- **FUTURE NATIVE:** disconnected phone-to-phone exchange using an Android implementation such as Nearby Connections.
+
+A browser does not provide a reliable offline Bluetooth mesh between phones. Firestore can cache previously loaded data, but does not create live disconnected peer synchronization.
+
+## Local development
+
+Requires Node.js 20 or newer.
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
-Quality checks:
+Demo Mode needs no Firebase credentials, Bluetooth hardware, or location permission. Select **Start Jury Demo** on the welcome screen.
+
+Quality commands:
 
 ```bash
+npm run verify:maps
 npm run typecheck
 npm run lint
 npm run test
-npm run test:e2e
+npm run test:coverage
 npm run build
+npm run test:e2e
+npm run check
 ```
 
-## What works without configuration
+## Map data
 
-- Create or join a temporary family with a family code and QR invite.
-- Four-device Jury Demo Mode with deterministic movement, warning, separation, SOS, reunion, and alert deduplication.
-- Real MapLibre map centered on Ramkund, Nashik, using a PMTiles vector archive and OSM-derived geography.
-- A pure Family Safety Engine derives states from coordinates, heartbeats, SOS, sharing, and reunion state. UI actions never directly assign a safety status.
-- Optional browser geolocation and experimental Web Bluetooth, both with explicit user interaction and honest simulated fallbacks.
-- PWA shell, responsive mobile map sheet, deep routes, local demo storage, and the legacy Simulation Lab.
+Production uses the bounded, same-origin archive at:
 
-## Map data and offline installation
+```text
+public/maps/nashik-ramkund-v1.pmtiles
+```
 
-The online default is the versioned Protomaps daily planet archive in `src/config/mapConfig.ts`. Production deployments should set `VITE_PMTILES_URL` to a controlled archive URL.
+The runtime URL is `/maps/nashik-ramkund-v1.pmtiles`; it never depends on the invalid 20260518 daily-build URL. `npm run verify:maps` rejects a missing, tiny, HTML, or non-v3 file. The application tries the regional archive, optional online backups, an installed OPFS copy, then the intentional coordinate fallback.
 
-For offline installation, create a bounded Ramkund extract with the PMTiles CLI:
+To regenerate the verified Ramkund extract with the official PMTiles CLI:
 
 ```bash
-pmtiles extract https://build.protomaps.com/20260518.pmtiles nashik-ramkund-v1.pmtiles --bbox=73.788,19.999,73.8005,20.012
+pmtiles extract https://build.protomaps.com/YYYYMMDD.pmtiles public/maps/nashik-ramkund-v1.pmtiles --bbox=73.788,19.999,73.8005,20.012
 ```
 
-Host that file with byte-range support and set `VITE_OFFLINE_PMTILES_URL`. The settings screen downloads it into Origin Private File System storage. When offline mode is selected, the map protocol reads the local `File` through PMTiles `FileSource`; if no archive is installed the UI says so and attempts the online source instead.
+Replace `YYYYMMDD` with an available official daily build. Verify the source and bounding box before committing. Do not use a global archive. See [map-and-pmtiles.md](docs/map-and-pmtiles.md).
 
-Map attribution: © OpenStreetMap contributors · Protomaps. Event overlay coordinates and bounds live in `src/config/mapConfig.ts`; app branding, colors, logo, names, and device UUIDs live in `src/config/brand.ts`.
+If the detailed map fails, markers, status circles, reunion geometry, fit-family, coordinates, and simulation remain available on the bundled fallback. A single Retry Map action restarts the finite source chain.
 
 ## Firebase and privacy
 
-With no Firebase environment variables the app uses browser-local demo storage. To prepare multi-phone synchronization, enable Firebase Anonymous Authentication and Cloud Firestore, copy `.env.example` to `.env.local`, and review `firebase.rules`. Family locations must never be publicly queryable.
+Copy `.env.example` to `.env.local` only when configuring Firebase. Incomplete or absent variables select local Demo Mode without initializing Firebase. Enable Anonymous Authentication and review `firebase.rules` before using Firestore. Locations are family-scoped and must never be publicly queryable.
 
-Tracking is opt-in, temporary, pausable, and private to the family session. Browser geolocation is not requested until the user presses the location button. Web Bluetooth requires a supported Chromium browser, HTTPS or localhost, a user gesture, OS permission, and compatible hardware.
+Browser location and Bluetooth permissions are requested only after explicit user actions. No credential or Firebase service-account secret belongs in client environment variables.
+
+## Offline behavior
+
+After one online load, the service worker caches the shell. Demo data and safety settings persist in local storage. To avoid corrupt partial-range caching, the service worker passes PMTiles ranges through; Settings can deliberately install the complete bounded archive into Origin Private File System. First-load offline use is not guaranteed; Firebase does not synchronize two disconnected phones; Web Bluetooth support varies.
 
 ## Deploy on Vercel
 
-Import the repository into Vercel with the Vite preset. Build command is `npm run build` and output directory is `dist`. `vercel.json` rewrites application routes to `index.html`, so `/map`, `/family`, `/alerts`, `/settings`, and `/simulation` survive direct loads.
+Import the repository with the Vite preset:
 
-## Architecture
+- Build command: `npm run build`
+- Output: `dist`
+- Node: 20 or newer
+- Firebase variables: optional
 
-- `src/services/familySafetyEngine.ts`: pure distance and status derivation
-- `src/services/alertEngine.ts`: deterministic alert lifecycle and deduplication
-- `src/services/offlineMapService.ts`: OPFS install/remove/source abstraction
-- `src/stores/useAppStore.ts`: raw device observations and demo orchestration
-- `src/features/map/LiveMapPage.tsx`: MapLibre, PMTiles, Turf geometry, reunion UI
-- `public/legacy/kumbh-kavach-command-center.html`: preserved legacy simulation
+`vercel.json` protects `/maps/*` from SPA rewrites, advertises byte ranges, sets immutable map caching, and explicitly rewrites application routes. Validate a deployment with a normal request and a `Range: bytes=0-7` request to the PMTiles URL.
 
-The React UI has no Electron dependency and can later be wrapped without rewriting the interface.
+## Troubleshooting
+
+- **Map verification failed:** regenerate the regional archive with the official tool and verified bounds.
+- **Detailed basemap unavailable:** use the intentional fallback, then Retry Map once network access returns.
+- **Old behavior after deployment:** update the service worker or use Settings → Clear app caches.
+- **`[BHK] ... publicKey or merchantId`:** no BHK/widget SDK exists in this repository; this is browser-extension or injected third-party console output. Test in a clean profile.
+- **Bluetooth unavailable/denied:** continue with simulated bands; no core demo flow depends on hardware.
+
+Technical details live under [docs](docs/architecture.md), including the safety engine, deterministic simulation, Firebase model, offline boundaries, testing, and future native direction.

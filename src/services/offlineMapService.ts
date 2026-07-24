@@ -22,23 +22,44 @@ export const offlineMapService = {
 
   async download(onProgress?: (progress: OfflineMapProgress) => void, signal?: AbortSignal) {
     const response = await fetch(mapConfig.offlineArchiveUrl, { signal });
-    if (!response.ok || !response.body) throw new Error(`Map download failed (${response.status}). Configure VITE_OFFLINE_PMTILES_URL with a bounded Nashik extract.`);
+    const contentType = response.headers.get('content-type') ?? '';
+    if (!response.ok || !response.body) {
+      throw new Error(`Map download failed (${response.status}). Configure VITE_OFFLINE_PMTILES_URL with a bounded Nashik extract.`);
+    }
+    if (contentType.includes('text/html')) {
+      throw new Error('Map download returned an HTML page instead of a PMTiles archive.');
+    }
     const totalBytes = Number(response.headers.get('content-length')) || undefined;
     const handle = await (await directory()).getFileHandle(ARCHIVE, { create: true });
     const writable = await handle.createWritable();
     const reader = response.body.getReader();
     let downloadedBytes = 0;
+    let signature = new Uint8Array();
     try {
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
+        if (signature.byteLength < 8) {
+          const joined = new Uint8Array(Math.min(8, signature.byteLength + value.byteLength));
+          joined.set(signature);
+          joined.set(value.subarray(0, joined.byteLength - signature.byteLength), signature.byteLength);
+          signature = joined;
+          if (signature.byteLength === 8) {
+            const label = new TextDecoder().decode(signature.subarray(0, 7));
+            if (label !== 'PMTiles' || signature[7] !== 3) {
+              throw new Error('Map download is not a supported PMTiles v3 archive.');
+            }
+          }
+        }
         await writable.write(value);
         downloadedBytes += value.byteLength;
         onProgress?.({ downloadedBytes, totalBytes, percent: totalBytes ? Math.round(downloadedBytes / totalBytes * 100) : undefined });
       }
+      if (signature.byteLength < 8) throw new Error('Map download ended before a valid PMTiles header was received.');
       await writable.close();
     } catch (error) {
       await writable.abort();
+      try { await (await directory()).removeEntry(ARCHIVE); } catch { /* no partial file */ }
       throw error;
     }
   },

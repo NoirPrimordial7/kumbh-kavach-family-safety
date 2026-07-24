@@ -1,24 +1,47 @@
-import { initializeApp, type FirebaseApp } from 'firebase/app';
-import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, type Firestore } from 'firebase/firestore';
-import { getAuth, signInAnonymously, type Auth } from 'firebase/auth';
+import { firebaseEnvironment } from '@/config/environment';
 
-export interface SyncAdapter { mode: 'firebase' | 'local-demo'; connect(): Promise<void>; saveFamily(id: string, value: unknown): Promise<void> }
+export interface SyncAdapter {
+  mode: 'firebase' | 'local-demo';
+  connect(): Promise<void>;
+  saveFamily(id: string, value: unknown): Promise<void>;
+}
 
 class LocalDemoAdapter implements SyncAdapter {
   mode = 'local-demo' as const;
   async connect() { return; }
-  async saveFamily(id: string, value: unknown) { localStorage.setItem(`kavach:family:${id}`, JSON.stringify(value)); }
-}
-
-class FirebaseAdapter implements SyncAdapter {
-  mode = 'firebase' as const; private app: FirebaseApp; private db: Firestore; private auth: Auth;
-  constructor() {
-    this.app = initializeApp({ apiKey: import.meta.env.VITE_FIREBASE_API_KEY, authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN, projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID, appId: import.meta.env.VITE_FIREBASE_APP_ID });
-    this.db = initializeFirestore(this.app, { localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }) });
-    this.auth = getAuth(this.app); void this.db;
+  async saveFamily(id: string, value: unknown) {
+    localStorage.setItem(`kavach:family:${id}`, JSON.stringify(value));
   }
-  async connect() { if (!this.auth.currentUser) await signInAnonymously(this.auth); }
-  async saveFamily(_id: string, _value: unknown) { /* Firestore writes are enabled after deployment security rules are configured. */ }
 }
 
-export const syncAdapter: SyncAdapter = import.meta.env.VITE_FIREBASE_API_KEY ? new FirebaseAdapter() : new LocalDemoAdapter();
+class LazyFirebaseAdapter implements SyncAdapter {
+  mode = 'firebase' as const;
+  private connected = false;
+
+  async connect() {
+    if (this.connected) return;
+    const [{ initializeApp }, firestore, auth] = await Promise.all([
+      import('firebase/app'),
+      import('firebase/firestore'),
+      import('firebase/auth'),
+    ]);
+    const app = initializeApp(firebaseEnvironment.config);
+    firestore.initializeFirestore(app, {
+      localCache: firestore.persistentLocalCache({
+        tabManager: firestore.persistentMultipleTabManager(),
+      }),
+    });
+    const authentication = auth.getAuth(app);
+    if (!authentication.currentUser) await auth.signInAnonymously(authentication);
+    this.connected = true;
+  }
+
+  async saveFamily(_id: string, _value: unknown) {
+    await this.connect();
+    // Writes remain disabled until the deployment has trusted invite redemption.
+  }
+}
+
+export const syncAdapter: SyncAdapter = firebaseEnvironment.configured
+  ? new LazyFirebaseAdapter()
+  : new LocalDemoAdapter();

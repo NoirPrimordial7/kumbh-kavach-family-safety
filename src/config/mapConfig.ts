@@ -1,17 +1,26 @@
+const base = import.meta.env.BASE_URL || '/';
+const withBase = (path: string) => `${base}${path.replace(/^\//, '')}`;
+
 export const mapConfig = {
   eventName: 'Ramkund · Nashik',
   center: [73.794167, 20.005556] as [number, number],
   bounds: [73.788, 19.999, 73.8005, 20.012] as [number, number, number, number],
+  verifiedBoundsSource: 'OpenStreetMap map API snapshot checked 20 July 2026',
   minZoom: 13,
   defaultZoom: 16.2,
   maxZoom: 19,
-  primaryStyleUrl: import.meta.env.VITE_MAP_PRIMARY_STYLE_URL ?? 'https://tiles.openfreemap.org/styles/liberty',
-  secondaryRasterUrl: import.meta.env.VITE_MAP_SECONDARY_RASTER_URL ?? 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-  onlineArchiveUrl: import.meta.env.VITE_PMTILES_URL ?? 'https://build.protomaps.com/20260518.pmtiles',
-  offlineArchiveUrl: import.meta.env.VITE_OFFLINE_PMTILES_URL ?? '/maps/nashik-ramkund-v1.pmtiles',
+  localArchiveUrl: withBase('maps/nashik-ramkund-v1.pmtiles'),
+  primaryStyleUrl: import.meta.env.VITE_MAP_PRIMARY_STYLE_URL
+    ?? 'https://tiles.openfreemap.org/styles/liberty',
+  secondaryRasterUrl: import.meta.env.VITE_MAP_SECONDARY_RASTER_URL
+    ?? 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+  offlineArchiveUrl: import.meta.env.VITE_OFFLINE_PMTILES_URL
+    ?? withBase('maps/nashik-ramkund-v1.pmtiles'),
   attribution: '© OpenStreetMap contributors · Protomaps',
   downloadLabel: 'Ramkund event area',
-  approximateDownloadBytes: 24_000_000,
+  approximateDownloadBytes: 944_216,
+  fallbackAvailable: true,
+  diagnostics: import.meta.env.DEV,
 } as const;
 
 export const eventPlaces = {
